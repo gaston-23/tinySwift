@@ -1,0 +1,4 @@
+com/compiladores/compilador/etapa1/AnalizadorLexico.class
+com/compiladores/compilador/etapa1/AnalizadorLexico$ExcepcionLexica.class
+com/compiladores/compilador/etapa1/AnalizadorLexico$Token.class
+com/compiladores/compilador/etapa1/Ejecutador.class
