@@ -24,6 +24,7 @@ public class AnalizadorLexico {
             int fila= 0;
             LectorArchivo lector = new LectorArchivo(ruta);
             String linea;
+            
             int comentado = 0;
             boolean exito = true;
             while((linea = lector.getLine())!=null) {
