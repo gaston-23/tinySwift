@@ -35,7 +35,6 @@ public class AnalizadorLexico {
                 if(linea.equals(" ") || linea.length()==0) {
                     continue;
                 }
-                //TODO: poner cuando es correcto el analisis
                 try {
                     comentado = this.extractToken(linea.toCharArray(), fila, comentado);
                 }catch (ExcepcionLexica e) {
@@ -44,7 +43,7 @@ public class AnalizadorLexico {
                     break;
                 }
             }
-                if (exito) System.out.println("CORRECTO: ANALISIS LEXICO");
+            if (exito) System.out.println("CORRECTO: ANALISIS LEXICO");
 			
 	}
 	/**
@@ -133,9 +132,8 @@ public class AnalizadorLexico {
 					continue;
 					
 				}else {
-					//operadores suma (op matematicos)
-					//TODO: separar tokens
-					if(linea[i] == '+' || linea[i] == '-' || linea[i] == '*') {
+					//operador suma 
+					if(linea[i] == '+') {
 						//si habia algun token se guarda
 						if(!curToken.equals("")) {
 							// guarda lo que tenia
@@ -145,6 +143,34 @@ public class AnalizadorLexico {
 							state = "";
 						}
 						Token token = new Token(fila, i , "op_suma", ""+linea[i]);
+						this.addToken(token);
+						continue;
+					}
+                                        //operador resta
+					if(linea[i] == '-') {
+						//si habia algun token se guarda
+						if(!curToken.equals("")) {
+							// guarda lo que tenia
+							Token token = new Token(fila, i - curToken.length() +1, state, curToken);
+							this.addToken(token);
+							curToken = "";
+							state = "";
+						}
+						Token token = new Token(fila, i , "op_resta", ""+linea[i]);
+						this.addToken(token);
+						continue;
+					}
+                                        //  operador multiplicacion
+                                        if(linea[i] == '*') {
+						//si habia algun token se guarda
+						if(!curToken.equals("")) {
+							// guarda lo que tenia
+							Token token = new Token(fila, i - curToken.length() +1, state, curToken);
+							this.addToken(token);
+							curToken = "";
+							state = "";
+						}
+						Token token = new Token(fila, i , "op_mult", ""+linea[i]);
 						this.addToken(token);
 						continue;
 					}
@@ -337,8 +363,8 @@ public class AnalizadorLexico {
 						continue;
 					}
 					//operador comparacion
-					if(linea[i] == '<' || linea[i] == '>' ) {
-						if(!curToken.equals("") && state.equals("op_comparador")) {
+					if(linea[i] == '<') {
+						if(!curToken.equals("") && (state.equals("op_mayor") || state.equals("op_menor") )) {
 							throw new ExcepcionLexica(fila, i, "se esperaba un simbolo =", ""+linea[i]);
 						}
 						//si habia algun token se guarda
@@ -351,7 +377,27 @@ public class AnalizadorLexico {
 						}
 						//operador comparacion
 						if(curToken.equals("")) {
-							state = "op_comparador";
+							state = "op_mayor";
+							curToken += linea[i];
+						}
+
+						continue;
+					}
+                                        if(linea[i] == '>') {
+						if(!curToken.equals("") && (state.equals("op_mayor") || state.equals("op_menor") )) {
+							throw new ExcepcionLexica(fila, i, "se esperaba un simbolo =", ""+linea[i]);
+						}
+						//si habia algun token se guarda
+						if(!curToken.equals("")) {
+							// guarda lo que tenia
+							Token token = new Token(fila, i - curToken.length() +1, state, curToken);
+							this.addToken(token);
+							curToken = "";
+							state = "";
+						}
+						//operador comparacion
+						if(curToken.equals("")) {
+							state = "op_menor";
 							curToken += linea[i];
 						}
 
@@ -453,11 +499,15 @@ public class AnalizadorLexico {
 						}
 						
 						//lit caracter
-						// TODO: Invalid escape sequence (valid ones are  \b  \t  \n  \f  \r  \"  \'  \\ )
 						if((""+linea[i]+linea[i+1]).equals("'\\") && linea[i+3]=='\'') {
-							Token token = new Token(fila, i , "int_car" , ""+ linea[i]+ linea[i+1]+ linea[i+2]+ linea[i+3]);
+                                                    if("btnfr'\"\\".contains(""+linea[i+2])){
+                                                        Token token = new Token(fila, i , "int_car" , ""+ linea[i]+ linea[i+1]+ linea[i+2]+ linea[i+3]);
 							this.addToken(token);
 							i += 3;
+                                                    }else{
+                                                        throw new ExcepcionLexica(fila, i, "declaracion de caracter invalida, se esperaba (\\b  \\t  \\n  \\f  \\r  \\\"  \\'  \\\\)", ""+linea[i+2]);
+                                                    }
+							
 							
 						}else {
 							if( linea[i+2] == '\'') {
@@ -499,7 +549,19 @@ public class AnalizadorLexico {
 							curToken.equals("not") 		||
 							curToken.equals("true") 	||
 							curToken.equals("new") 		||
-							curToken.equals("nil")	) 	&& 
+							curToken.equals("nil") 		||
+							curToken.equals("init") 		||
+							curToken.equals("var") 		||
+							curToken.equals("private") 		||
+							curToken.equals("func") 		||
+							curToken.equals("static") 		||
+							curToken.equals("return") 		||
+							curToken.equals("self") 		||
+							curToken.equals("void") 		||
+							curToken.equals("Int") 		||
+							curToken.equals("Bool") 		||
+							curToken.equals("Char") 		||
+							curToken.equals("String")	) 	&& 
 							(i+1 < linea.length && !((linea[i+1] < 91 && linea[i+1] > 64) || (linea[i+1] < 123 && linea[i+1] > 96) || linea[i+1] == '_'))){
 								Token token = new Token(fila, i - curToken.length() +1, "p_"+curToken, curToken);
 								this.addToken(token);
@@ -513,7 +575,9 @@ public class AnalizadorLexico {
 				}
 			}
 		}
-		//TODO: verificar comillas dobles
+		if(state.equals("lit_cad")) {
+                    throw new ExcepcionLexica(fila, linea.length, "se esperaba \"","fin de linea");
+                }
 		return 0;
 	}
 	
