@@ -127,7 +127,7 @@ public class AnalizadorLexico {
 						return 0;
 					}
 					//solo es simbolo "/"
-					Token token = new Token(fila, i , "op_suma", ""+linea[i]);
+					Token token = new Token(fila, i , "op_div", ""+linea[i]);
 					this.addToken(token);
 					continue;
 					
@@ -315,50 +315,55 @@ public class AnalizadorLexico {
 						this.addToken(token);
 						continue;
 					}
-					
-					//operador igual
-					//TODO: separar tokens
-					if(linea[i] == '!' || linea[i] == '=' ) {
+					//operador not
+					if(linea[i] == '!' ) {
 						//si habia algun token se guarda
-						if(!curToken.equals("") && !state.equals("op_unit") && !state.equals("op_comparador")) {
+						if(!curToken.equals("")) {
 							// guarda lo que tenia
 							Token token = new Token(fila, i - curToken.length() +1, state, curToken);
 							this.addToken(token);
 							curToken = "";
 							state = "";
 						}
-						if(state.equals("op_unit")) {
-							if(linea[i] == '!')	{
-								//throw error se esperaba un simbolo =
-								throw new ExcepcionLexica(fila, i, "se esperaba un simbolo =", ""+linea[i]);
-							//op igual
-							}else {
-								Token token = new Token(fila, i-1 , "op_igual", curToken+linea[i]);
-								this.addToken(token);
-								curToken = "";
-								state = "";
-								continue;
-							}
-							
+						Token token = new Token(fila, i , "op_not", ""+linea[i]);
+						this.addToken(token);
+						continue;
+					}
+					//operador igual
+					if(linea[i] == '=' ) {
+						//si habia algun token que no sea de comparacion se guarda
+						if(!curToken.equals("") && !state.equals("op_asignacion") && !state.equals("op_menor") && !state.equals("op_mayor") && !state.equals("op_not")) {
+							// guarda lo que tenia
+							Token token = new Token(fila, i - curToken.length() +1, state, curToken);
+							this.addToken(token);
+							curToken = "";
+							state = "";
 						}
-						if(state.equals("op_comparador")) {
-							if(linea[i] != '=')	{
-								//throw error se esperaba un simbolo = < >
-								throw new ExcepcionLexica(fila, i, "se esperaba un simbolo =", ""+linea[i]);
-							//op comparador
-							}else {
-								Token token = new Token(fila, i-1 , "op_comparador", curToken+linea[i]);
-								this.addToken(token);
-								curToken = "";
-								state = "";
-								continue;
-							}
-							
+						if(state.equals("op_asignacion")) {
+							Token token = new Token(fila, i-1 , "op_igual", curToken+linea[i]);
+                                                        this.addToken(token);
+                                                        curToken = "";
+                                                        state = "";
+                                                        continue;							
+						}
+						if(state.equals("op_menor") || state.equals("op_mayor")) {
+							Token token = new Token(fila, i-1 , state+"_o_igual", curToken+linea[i]);
+                                                        this.addToken(token);
+                                                        curToken = "";
+                                                        state = "";
+                                                        continue;
+						}
+                                                if(state.equals("op_not")) {
+							Token token = new Token(fila, i-1 , "op_distinto", curToken+linea[i]);
+                                                        this.addToken(token);
+                                                        curToken = "";
+                                                        state = "";
+                                                        continue;							
 						}
 						//operador unitario
 						if(curToken.equals("")) {
-							state = "op_unit";
-							curToken += linea[i];
+							state = "op_asignacion";
+							curToken = ""+linea[i];
 						}
 						continue;
 					}
@@ -452,8 +457,22 @@ public class AnalizadorLexico {
 							throw new ExcepcionLexica(fila, i, "se esperaba un simbolo |", ""+linea[i+1]);
 						}
 						continue;
+					}					
+					//operador modulo
+					if(linea[i] == '%') {
+						//si habia algun token se guarda
+						if(!curToken.equals("") && !state.equals("lit_cad")) {
+                                                    // guarda lo que tenia
+                                                    Token token = new Token(fila, i - curToken.length() +1, state, curToken);
+                                                    this.addToken(token);
+                                                    curToken = "";
+                                                    state = "";
+						}
+						//operador modulo
+						Token token = new Token(fila, i - curToken.length() +1, "op_mod" , "%");
+                                                this.addToken(token);
+                                                i++;
 					}
-					
 					//literal entero
 					if((int)linea[i] > 47 && (int)linea[i] < 58 ) {
 						
@@ -469,7 +488,7 @@ public class AnalizadorLexico {
 						state = "lit_ent";
 						continue;
 					}
-					//lit cadena
+                                        //lit cadena
 					if(linea[i] == '"') {
 						//si habia algun token se guarda
 						if(!curToken.equals("") && !state.equals("lit_cad")) {
