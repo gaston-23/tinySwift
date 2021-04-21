@@ -176,4 +176,268 @@ public class AnalizadorSintactico {
         Sentencia();
         S();
     }
+    
+    Sentencia(){
+        
+    }
+    
+    Sentencia-Prima(){
+        Macheo("else");
+        Sentencia();
+    }
+    
+    X(){
+        Expresion();
+    }
+    
+    Lista-Declaracion-Variables(){
+        Macheo("id");
+        Lista-Declaracion-Variables-Prima();
+    }
+    
+    Lista-Declaracion-Variables-Primas(){
+        Macheo(",");
+        Lista-Declaracion-Variables();
+    }
+    
+    Asignacion(){
+        AccesoVar-Simple();
+        Macheo("=");
+        Expresion();
+        
+        AccesoSelf-Simple();
+        Macheo("=");
+        Expresion();
+    }
+    
+    AccesoVar-Simple(){
+        Macheo("id");
+        Enc();
+    }
+    
+    AccesoSelf-Simple(){
+        Macheo("self");
+        Enc();
+    }
+    
+    Enc(){
+        Encadenado-Simple();
+        Enc();
+    }
+    
+    Encadenado-Simple(){
+        Macheo(".");
+        Macheo("id");
+    }
+    
+    Sentencia-Simple(){
+        Macheo("(");
+        Expresion();
+        Macheo(")");
+    }
+    
+    Expresion(){
+        ExpOr();
+    }
+    
+    ExpOr(){
+        ExpAnd();
+        ExpOrPrima();
+    }
+    
+    ExpOrPrima(){
+        Macheo("||");
+        ExpAnd();
+        ExpOrPrima();
+    }
+    
+    ExpAnd(){
+        ExpIgual();
+        ExpAndPrima();
+    }
+    
+    ExpAndPrima(){
+        Macheo("&&");
+        ExpIgual();
+        ExpAndPrima();
+    }
+    
+    expIgual(){
+        expCompuesta();
+        expIgualPrima();
+    }
+    
+    expIgualPrima(){
+        opIgual();
+        expCompuesta();
+        expIgualPrima();
+    }
+    
+    expCompuesta(){
+        opCompuesto();
+        expAdd();
+    }
+    
+    expAdd(){
+        expMul();
+        expAddPrima();
+    }
+    
+    expAddPrima(){
+        opAdd();
+        expMul();
+        expAddPrima();
+    }
+    
+    expMul(){
+        expUn();
+        expMulPrima();
+    }
+    
+    expMulPrima(){
+        opMul();
+        expUn();
+        expMulPrima();
+    }
+    
+    expUn(){
+        opUnario();
+        expUn();
+        
+        operando();
+    }
+    
+    opIgual(){
+        Macheo("==");
+        Macheo("!=");
+    }
+    
+    opCompuesto(){
+        Macheo("<");
+        Macheo(">");
+        Macheo("<=");
+        Macheo(">=");
+    }
+    
+    opAdd(){
+        Macheo("+");
+        Macheo("-");
+    }
+    
+    opUnario(){
+        Macheo("+");
+        Macheo("-");
+        Macheo("!");
+    }
+    
+    opMul(){
+        Macheo("*");
+        Macheo("/");
+        Macheo("%");
+    }
+    
+    operando(){
+        literal();
+        
+        primario();
+        enc-mul();
+    }
+    
+    literal(){
+        Macheo("nil");
+        Macheo("true");
+        Macheo("false");
+        Macheo("intLiteral");
+        Macheo("stringLiteral");
+        Macheo("charLiteral");
+    }
+    
+    primario(){
+        expresionParentizada();
+        accesoSelf();
+        accesoVar();
+        llamada-Metodo();
+        llamada-MetodoEstatico();
+        llamada-Constructor();
+    }
+    
+    expresionParentizada(){
+        Macheo("(");
+        expresion();
+        Macheo(")");
+        enc-mul();
+    }
+    
+    enc-mul(){
+        encadenado();
+    }
+    
+    accesoSelf(){
+        macheo("self");
+        enc-mul();
+    }
+    
+    accesoVar(){
+        macheo("id");
+        enc-mul();
+    }
+    
+    llamada-Metodo(){
+        macheo("id");
+        argumentos-actuales();
+        enc-mul();
+    }
+    
+    llamada-Metodo-Estatico(){
+        macheo("id");
+        macheo(".");
+        llamada-metodo();
+        enc-mul();
+    }
+    
+    llamada-Constructor(){
+        macheo("new");
+        macheo("id");
+        argumentos-actuales();
+        enc-mul();
+    }
+    
+    argumentos-Actuales(){
+        macheo("(");
+        list-Exp();
+        macheo(")");
+    }
+    
+    list-Exp(){
+        lista-Expresiones();
+    }
+    
+    lista-Expresiones(){
+        expresion();
+        lista-Expresiones-Prima();
+    }
+    
+    lista-Expresiones-Prima(){
+        macheo(",");
+        lista-Expresiones();
+    }
+    
+    encadenado(){
+        macheo(".");
+        llamada-Metodo-Encadenado();
+        
+        macheo(".");
+        acceso-Variable-Encadenado();
+    }
+    
+    llamada-Metodo-Encadenado(){
+        macheo("id");
+        argumentos-Actuales();
+        enc-mul();
+    }
+    
+    acceso-Variable-Encadenado(){
+        macheo("id");
+        enc-mul();
+    }
 }
