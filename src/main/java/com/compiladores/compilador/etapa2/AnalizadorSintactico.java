@@ -5,174 +5,215 @@
  */
 package com.compiladores.compilador.etapa2;
 
+import com.compiladores.compilador.etapa1.AnalizadorLexico;
+import com.compiladores.compilador.etapa1.Token;
+
+
 /**
  *
  * @author gx23
  */
 public class AnalizadorSintactico {
     
-    Program(){
-        C();
-        ClaseMain();
-        C();
-    }
+    private Token tokenActual ;
+    private AnalizadorLexico al;
     
-    C(){
-        Clase();
-        C();
+    public AnalizadorSintactico (AnalizadorLexico aL) {
+        this.al = aL;
+        this.tokenActual = al.nextToken();
+        
+        //comenzar con program()
     }
-    
-    ClaseMain(){
-        Macheo("class");
-        Macheo("Main");
-        H();
-        Macheo("{");
-        M();
-        Macheo("static");
-        Macheo("func");
-        Macheo("void");
-        Macheo("main");
-        Macheo("(");
-        Macheo(")");
-        Bloque();
-        M();
-        Macheo("}");
+
+    private boolean macheo(String w) throws ExcepcionSintactica {
+        if(tokenActual.getValor().equals(w)){
+            this.tokenActual = this.al.nextToken();
+            return true;
+        }else return false;
     }
-    
-    H(){
-        Herencia();
+
+    private boolean program() throws ExcepcionSintactica {
+        c();
+        claseMain();
+        c();
+        return true;        
     }
-    
-    M(){
-        Miembro();
-        M();
+
+    private void c() {
+        
+        clase();
+        
+        c();
+        //TODO lambda
     }
-    
-    Clase(){
-        Macheo("class");
-        Macheo("id");
-        H();
-        Macheo("{");
-        M();
-        Macheo("}");
+
+    private void claseMain() throws ExcepcionSintactica {
+        if( macheo("class") && macheo("Main")){
+            h();
+            if(macheo("{")){
+                m();
+                if(macheo("static") && macheo("func") && macheo("void") && macheo("main") && macheo("(") && macheo(")")){
+                    bloque();
+                    m();
+                    if(!macheo("}")) //TODO error sintactico no machea
+                }
+            }else{
+                //TODO error sintactico no machea
+            }
+        }else{
+            //TODO error sintactico no machea
+        }
     }
-    
-    Herencia(){
-        Macheo(":");
-        Tipo();
+
+    private void h() throws ExcepcionSintactica {
+        herencia();
+        //TODO lambda
     }
-    
-    Miembro(){
+
+    private void m() throws ExcepcionSintactica {
+        miembro();
+        m();
+        //TODO lambda
+    }
+
+    private void clase() throws ExcepcionSintactica {
+        if( macheo("class") && macheo("id")){
+            h(); 
+            if( macheo("{") ){
+               m();
+               if( !macheo("}") ){ 
+                   //TODO error sintactico no machea
+               }
+            }else {
+                //TODO error sintactico no machea
+            }
+
+        }else {
+            //TODO error sintactico no machea
+        }
+        
+    }
+
+    private void herencia() throws ExcepcionSintactica {
+        if(macheo(":")){
+            tipo();
+        }else{
+            //TODO error sintactico no machea
+        }
+        
+    }
+
+    private void Miembro() throws ExcepcionSintactica {
         Atributo();
         Metodo();
         Constante();
         Constructor();
     }
-    
-    Constructor(){
-        Macheo("init");
-        Argumentos-Formales();
+
+    private void Constructor() throws ExcepcionSintactica {
+        macheo("init");
+        Argumentos - Formales();
         Bloque();
     }
-    
-    Atributo(){
+
+    private void Atributo() throws ExcepcionSintactica {
         V();
-        Macheo("var");
+        macheo("var");
         Tipo();
-        Macheo(":");
-        Lista-Declaracion-Variables();
-        Macheo(";");
+        macheo(":");
+        Lista - Declaracion - Variables();
+        macheo(";");
     }
-    
-    V(){
+
+    private void V() throws ExcepcionSintactica {
         Visibilidad();
     }
-    
-    Metodo(){
+
+    private void Metodo() throws ExcepcionSintactica {
         F();
-        Macheo("func");
-        Tipo-Metodo();
-        Macheo("id");
-        Argumentos-Formales();
+        macheo("func");
+        Tipo - Metodo();
+        macheo("id");
+        Argumentos - Formales();
         Bloque();
     }
-    
-    F(){
-        Forma-Metodo();
+
+    private void F() throws ExcepcionSintactica {
+        Forma - Metodo();
     }
-    
-    Visibilidad(){
-        Macheo("private");
+
+    private void Visibilidad() throws ExcepcionSintactica {
+        macheo("private");
     }
-    
-    Forma-Metodo(){
-        Macheo("static");
+
+    private void Forma-Metodo() throws ExcepcionSintactica {
+        macheo("static");
     }
-    
-    Constante(){
-        Macheo("let");
-        Tipo-Primitivo();
-        Macheo(":");
-        Macheo("id");
-        Macheo("=");
+
+    private void Constante() throws ExcepcionSintactica {
+        macheo("let");
+        Tipo - Primitivo();
+        macheo(":");
+        macheo("id");
+        macheo("=");
         Expresion();
-        Macheo(";");
+        macheo(";");
     }
-    
-    Argumentos-Formales(){
-        Macheo("(");
+
+    private void Argumentos-Formales() throws ExcepcionSintactica {
+        macheo("(");
         L();
-        Macheo(")");
+        macheo(")");
     }
-    
-    L(){
-        Lista-Argumentos-Formales();
+
+    L() throws ExcepcionSintactica {
+        Lista - Argumentos - Formales();
     }
-    
-    Lista-Argumentos-Formales(){
-        Argumento-Formal();
-        Lista-Argumentos-Formales-Prima();
+
+    Lista-Argumentos-Formales() throws ExcepcionSintactica {
+        Argumento - Formal();
+        Lista - Argumentos - Formales - Prima();
     }
-    
-    Lista-Argumentos-Formales-Prima(){
-        Macheo(",");
-        Lista-Argumentos-Formales();
+
+    Lista-Argumentos-Formales-Prima() throws ExcepcionSintactica {
+        macheo(",");
+        Lista - Argumentos - Formales();
     }
-    
-    Argumento-Formal(){
+
+    Argumento-Formal() throws ExcepcionSintactica {
         Tipo();
-        Macheo(":");
-        Macheo("id");
+        macheo(":");
+        macheo("id");
     }
-    
-    Tipo-Metodo(){
+
+    Tipo-Metodo() throws ExcepcionSintactica {
         Tipo();
-        Macheo("void");
+        macheo("void");
     }
-    
-    Tipo(){
-        Tipo-Primitivo();
-        Tipo-Referencia();
+
+    Tipo() throws ExcepcionSintactica {
+        Tipo - Primitivo();
+        Tipo - Referencia();
     }
-    
-    Tipo-Primitivo(){
-        Macheo("String");
-        Macheo("Bool");
-        Macheo("Int");
-        Macheo("Char");
+
+    Tipo-Primitivo() throws ExcepcionSintactica {
+        macheo("String");
+        macheo("Bool");
+        macheo("Int");
+        macheo("Char");
     }
-    
-    Tipo-Referencia(){
-        Macheo("id");
+
+    Tipo-Referencia() throws ExcepcionSintactica {
+        macheo("id");
     }
-    
-    Bloque(){
-        Macheo("{");
+
+    Bloque() throws ExcepcionSintactica {
+        macheo("{");
         S();
-        Macheo("}");
+        macheo("}");
     }
-    
-    S(){
+
+    S() throws ExcepcionSintactica {
         Sentencia();
         S();
     }
