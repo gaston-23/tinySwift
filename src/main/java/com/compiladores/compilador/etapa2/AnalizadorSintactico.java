@@ -39,7 +39,7 @@ public class AnalizadorSintactico {
         return true;        
     }
 
-    private void c() {
+    private void c() throws ExcepcionSintactica {
         
         clase();
         
@@ -55,7 +55,13 @@ public class AnalizadorSintactico {
                 if(macheo("static") && macheo("func") && macheo("void") && macheo("main") && macheo("(") && macheo(")")){
                     bloque();
                     m();
-                    if(!macheo("}")) //TODO error sintactico no machea
+                    if(!macheo("}")){
+                        //TODO error sintactico no machea
+                    }else{
+                        //TODO error sintactico no machea
+                    }
+                }else{
+                    //TODO error sintactico no machea
                 }
             }else{
                 //TODO error sintactico no machea
@@ -103,181 +109,195 @@ public class AnalizadorSintactico {
         
     }
 
-    private void Miembro() throws ExcepcionSintactica {
-        Atributo();
-        Metodo();
-        Constante();
-        Constructor();
+    private void miembro() throws ExcepcionSintactica {
+        atributo();
+        metodo();
+        constante();
+        constructor();
+        //TODO primeros
     }
 
-    private void Constructor() throws ExcepcionSintactica {
-        macheo("init");
-        Argumentos - Formales();
-        Bloque();
+    private void constructor() throws ExcepcionSintactica {
+        if(macheo("init")){
+            argumentosFormales();
+            bloque();
+        }else{
+            //TODO error sintactico no machea
+        }
     }
 
-    private void Atributo() throws ExcepcionSintactica {
-        V();
-        macheo("var");
-        Tipo();
-        macheo(":");
-        Lista - Declaracion - Variables();
-        macheo(";");
+    private void atributo() throws ExcepcionSintactica {
+        v();
+        if(macheo("var")){
+            tipo();
+            if(macheo(":")){
+                listaDeclaracionVariables();
+                if(!macheo(";")){
+                    //TODO error sintactico no machea
+                }
+            }else{
+                //TODO error sintactico no machea
+            }
+        }else{
+            //TODO error sintactico no machea
+        }
     }
 
-    private void V() throws ExcepcionSintactica {
-        Visibilidad();
+    
+    private void v() throws ExcepcionSintactica {
+        visibilidad();
+        //TODO  lambda
     }
-
-    private void Metodo() throws ExcepcionSintactica {
-        F();
+    ///////////////////////
+    private void metodo() throws ExcepcionSintactica {
+        f();
         macheo("func");
-        Tipo - Metodo();
+        tipoMetodo();
         macheo("id");
-        Argumentos - Formales();
+        argumentosFormales();
         Bloque();
     }
 
-    private void F() throws ExcepcionSintactica {
-        Forma - Metodo();
+    private void f() throws ExcepcionSintactica {
+        formaMetodo();
     }
 
-    private void Visibilidad() throws ExcepcionSintactica {
+    private void visibilidad() throws ExcepcionSintactica {
         macheo("private");
     }
 
-    private void Forma-Metodo() throws ExcepcionSintactica {
+    private void formaMetodo() throws ExcepcionSintactica {
         macheo("static");
     }
 
-    private void Constante() throws ExcepcionSintactica {
+    private void constante() throws ExcepcionSintactica {
         macheo("let");
-        Tipo - Primitivo();
+        tipoPrimitivo();
         macheo(":");
         macheo("id");
         macheo("=");
-        Expresion();
+        expresion();
         macheo(";");
     }
 
-    private void Argumentos-Formales() throws ExcepcionSintactica {
+    private void argumentosFormales() throws ExcepcionSintactica {
         macheo("(");
-        L();
+        l();
         macheo(")");
     }
 
-    L() throws ExcepcionSintactica {
-        Lista - Argumentos - Formales();
+    private void L() throws ExcepcionSintactica {
+        listaArgumentosFormales();
     }
 
-    Lista-Argumentos-Formales() throws ExcepcionSintactica {
-        Argumento - Formal();
-        Lista - Argumentos - Formales - Prima();
+    private void listaArgumentosFormales() throws ExcepcionSintactica {
+        ArgumentoFormal();
+        listaArgumentosFormalesPrima();
     }
 
-    Lista-Argumentos-Formales-Prima() throws ExcepcionSintactica {
+    private void listaArgumentosFormalesPrima() throws ExcepcionSintactica {
         macheo(",");
-        Lista - Argumentos - Formales();
+        listaArgumentosFormales();
     }
 
-    Argumento-Formal() throws ExcepcionSintactica {
-        Tipo();
+    private void argumentoFormal() throws ExcepcionSintactica {
+        tipo();
         macheo(":");
         macheo("id");
     }
 
-    Tipo-Metodo() throws ExcepcionSintactica {
-        Tipo();
+    private void tipoMetodo() throws ExcepcionSintactica {
+        tipo();
         macheo("void");
     }
 
-    Tipo() throws ExcepcionSintactica {
-        Tipo - Primitivo();
-        Tipo - Referencia();
+    private void tipo() throws ExcepcionSintactica {
+        tipoPrimitivo();
+        tipoReferencia();
     }
 
-    Tipo-Primitivo() throws ExcepcionSintactica {
+    private void tipoPrimitivo() throws ExcepcionSintactica {
         macheo("String");
         macheo("Bool");
         macheo("Int");
         macheo("Char");
     }
 
-    Tipo-Referencia() throws ExcepcionSintactica {
+    private void tipoReferencia() throws ExcepcionSintactica {
         macheo("id");
     }
 
-    Bloque() throws ExcepcionSintactica {
+    private void bloque() throws ExcepcionSintactica {
         macheo("{");
-        S();
+        s();
         macheo("}");
     }
 
-    S() throws ExcepcionSintactica {
-        Sentencia();
-        S();
+    private void s() throws ExcepcionSintactica {
+        sentencia();
+        s();
     }
     
-    Sentencia(){
+    sentencia(){
         
     }
     
-    Sentencia-Prima(){
+    sentenciaPrima(){
         Macheo("else");
-        Sentencia();
+        sentencia();
     }
     
     X(){
-        Expresion();
+        expresion();
     }
     
-    Lista-Declaracion-Variables(){
+    listaDeclaracionVariables(){
         Macheo("id");
-        Lista-Declaracion-Variables-Prima();
+        listaDeclaracionVariablesPrima();
     }
     
-    Lista-Declaracion-Variables-Primas(){
+    listaDeclaracionVariablesPrimas(){
         Macheo(",");
-        Lista-Declaracion-Variables();
+        listaDeclaracionVariables();
     }
     
     Asignacion(){
-        AccesoVar-Simple();
+        AccesoVarSimple();
         Macheo("=");
-        Expresion();
+        expresion();
         
-        AccesoSelf-Simple();
+        AccesoSelfSimple();
         Macheo("=");
-        Expresion();
+        expresion();
     }
     
-    AccesoVar-Simple(){
+    AccesoVarSimple(){
         Macheo("id");
         Enc();
     }
     
-    AccesoSelf-Simple(){
+    AccesoSelfSimple(){
         Macheo("self");
         Enc();
     }
     
     Enc(){
-        Encadenado-Simple();
+        encadenadoSimple();
         Enc();
     }
     
-    Encadenado-Simple(){
+    encadenadoSimple(){
         Macheo(".");
         Macheo("id");
     }
     
-    Sentencia-Simple(){
+    sentenciaSimple(){
         Macheo("(");
-        Expresion();
+        expresion();
         Macheo(")");
     }
     
-    Expresion(){
+    expresion(){
         ExpOr();
     }
     
@@ -367,7 +387,7 @@ public class AnalizadorSintactico {
     
     opUnario(){
         Macheo("+");
-        Macheo("-");
+        Macheo("");
         Macheo("!");
     }
     
@@ -381,7 +401,7 @@ public class AnalizadorSintactico {
         literal();
         
         primario();
-        enc-mul();
+        encmul();
     }
     
     literal(){
@@ -397,88 +417,88 @@ public class AnalizadorSintactico {
         expresionParentizada();
         accesoSelf();
         accesoVar();
-        llamada-Metodo();
-        llamada-MetodoEstatico();
-        llamada-Constructor();
+        llamadaMetodo();
+        llamadaMetodoEstatico();
+        llamadaConstructor();
     }
     
     expresionParentizada(){
         Macheo("(");
         expresion();
         Macheo(")");
-        enc-mul();
+        encmul();
     }
     
-    enc-mul(){
+    encmul(){
         encadenado();
     }
     
     accesoSelf(){
         macheo("self");
-        enc-mul();
+        encmul();
     }
     
     accesoVar(){
         macheo("id");
-        enc-mul();
+        encmul();
     }
     
-    llamada-Metodo(){
+    llamadaMetodo(){
         macheo("id");
-        argumentos-actuales();
-        enc-mul();
+        argumentosactuales();
+        encmul();
     }
     
-    llamada-Metodo-Estatico(){
+    llamadaMetodoEstatico(){
         macheo("id");
         macheo(".");
-        llamada-metodo();
-        enc-mul();
+        llamadametodo();
+        encmul();
     }
     
-    llamada-Constructor(){
+    llamadaConstructor(){
         macheo("new");
         macheo("id");
-        argumentos-actuales();
-        enc-mul();
+        argumentosactuales();
+        encmul();
     }
     
-    argumentos-Actuales(){
+    argumentosActuales(){
         macheo("(");
-        list-Exp();
+        listExp();
         macheo(")");
     }
     
-    list-Exp(){
-        lista-Expresiones();
+    listExp(){
+        listaexpresiones();
     }
     
-    lista-Expresiones(){
+    listaexpresiones(){
         expresion();
-        lista-Expresiones-Prima();
+        listaexpresionesPrima();
     }
     
-    lista-Expresiones-Prima(){
+    listaexpresionesPrima(){
         macheo(",");
-        lista-Expresiones();
+        listaexpresiones();
     }
     
     encadenado(){
         macheo(".");
-        llamada-Metodo-Encadenado();
+        llamadaMetodoencadenado();
         
         macheo(".");
-        acceso-Variable-Encadenado();
+        accesoVariableencadenado();
     }
     
-    llamada-Metodo-Encadenado(){
+    llamadaMetodoencadenado(){
         macheo("id");
-        argumentos-Actuales();
-        enc-mul();
+        argumentosActuales();
+        encmul();
     }
     
-    acceso-Variable-Encadenado(){
+    accesoVariableencadenado(){
         macheo("id");
-        enc-mul();
+        encmul();
     }
 }
