@@ -371,52 +371,76 @@ public class AnalizadorSintactico {
     }
     
     private void listaDeclaracionVariables() throws ExcepcionSintactica {
-        macheo("id");
-        listaDeclaracionVariablesPrima();
+        if(macheo("id")){
+            listaDeclaracionVariablesPrima();
+        }
         
     }
     
     private void listaDeclaracionVariablesPrima() throws ExcepcionSintactica {
-        macheo(",");
-        listaDeclaracionVariables();
-        //TODO lambda
+        if(macheo(",")){
+            listaDeclaracionVariables();
+        }else{
+            //TODO lambda
+        }
+        
     }
     
     private void asignacion() throws ExcepcionSintactica {
-        accesoVarSimple();
-        macheo("=");
-        expresion();
-        
-        accesoSelfSimple();
-        macheo("=");
-        expresion();
+        if(true){ //TODO primeros accesoVarSimple
+            accesoVarSimple();
+            
+        }else{ //TODO primeros accesoSelfSimple
+            accesoSelfSimple();
+        }
+        if(macheo("=")){
+            expresion();
+        }else{
+            //TODO error sintactico no machea
+        }
     }
     
     private void accesoVarSimple() throws ExcepcionSintactica {
-        macheo("id");
-        enc();
+        if(macheo("id")){
+            enc();
+        }else{
+            //TODO error sintactico no machea
+        }
     }
     
     private void accesoSelfSimple() throws ExcepcionSintactica {
-        macheo("self");
-        enc();
+        if(macheo("self")){
+            enc();
+        }else{
+            //TODO error sintactico no machea
+        }
     }
     
     private void enc() throws ExcepcionSintactica {
-        encadenadoSimple();
-        enc();
-        //TODO lambda
+        if(true){ //TODO primeros encadenadoSimple
+            encadenadoSimple();
+            enc();
+        }else{
+            //TODO lambda
+        }
+        
     }
     
     private void encadenadoSimple() throws ExcepcionSintactica {
-        macheo(".");
-        macheo("id");
+        if(!macheo(".") || !macheo("id")){
+            //TODO error sintactico no machea
+        }
     }
     
     private void sentenciaSimple() throws ExcepcionSintactica {
-        macheo("(");
-        expresion();
-        macheo(")");
+        if(macheo("(")){
+            expresion();
+            if(!macheo(")")){
+                //TODO error sintactico no machea
+            }
+        }else{
+            //TODO error sintactico no machea
+        }
     }
     
     private void expresion() throws ExcepcionSintactica {
@@ -429,10 +453,14 @@ public class AnalizadorSintactico {
     }
     
     private void expOrPrima() throws ExcepcionSintactica {
-        macheo("||");
-        expAnd();
-        expOrPrima();
-        //TODO lambda
+        if(macheo("||")){
+            expAnd();
+            expOrPrima();
+        }else{
+            //TODO lambda
+        }
+        
+        
     }
     
     private void expAnd() throws ExcepcionSintactica {
@@ -441,10 +469,12 @@ public class AnalizadorSintactico {
     }
     
     private void expAndPrima() throws ExcepcionSintactica {
-        macheo("&&");
-        expIgual();
-        expAndPrima();
-        //TODO lambda
+        if(macheo("&&")){
+            expIgual();
+            expAndPrima();
+        }else{
+            //TODO lambda
+        }
     }
     
     private void expIgual() throws ExcepcionSintactica {
@@ -460,8 +490,14 @@ public class AnalizadorSintactico {
     }
     
     private void expCompuesta() throws ExcepcionSintactica {
+        expAdd();
+        expCompuestaPrima();
+    }
+    
+    private void expCompuestaPrima() throws ExcepcionSintactica {
         opCompuesto();
         expAdd();
+        //TODO lambda
     }
     
     private void expAdd() throws ExcepcionSintactica {
@@ -489,116 +525,181 @@ public class AnalizadorSintactico {
     }
     
     private void expUn() throws ExcepcionSintactica {
-        opUnario();
-        expUn();
+        if(true){ //TODO primeros opUnario
+            opUnario();
+            expUn();
+        }else{ //TODO primeros operando
+            operando();
+        }
         
-        operando();
+        
+        
     }
     
     private void opIgual() throws ExcepcionSintactica {
-        macheo("==");
-        macheo("!=");
+        if(!macheo("==")){
+            if(!macheo("!=")){
+                //TODO error sintactico no machea
+            }
+        }
+        
     }
     
     private void opCompuesto() throws ExcepcionSintactica {
-        macheo("<");
-        macheo(">");
-        macheo("<=");
-        macheo(">=");
+        if(!macheo("<") || !macheo(">") || !macheo("<=") || !macheo(">=")){
+            //TODO error sintactico no machea
+        }
     }
     
     private void opAdd() throws ExcepcionSintactica {
-        macheo("+");
-        macheo("-");
+        if(!macheo("+") || !macheo("-") ){
+            //TODO error sintactico no machea
+        }
     }
     
     private void opUnario() throws ExcepcionSintactica {
-        macheo("+");
-        macheo("");
-        macheo("!");
+        if(!macheo("+") || !macheo("") || !macheo("!")){
+            //TODO error sintactico no machea
+        }
     }
     
     private void opMul() throws ExcepcionSintactica {
-        macheo("*");
-        macheo("/");
-        macheo("%");
+        if(!macheo("*") || !macheo("/") || !macheo("%")){
+            //TODO error sintactico no machea
+        }
     }
     
     private void operando() throws ExcepcionSintactica {
-        literal();
+        if(true){ //TODO primeros de literal
+            literal();
+        }else{
+            if(true){ //TODO primeros de primario
+                primario();
+                encmul();
+            }else{
+                //TODO error sintactico no machea
+            }
+        }
         
-        primario();
-        encmul();
+        
     }
     
     private void literal() throws ExcepcionSintactica {
-        macheo("nil");
-        macheo("true");
-        macheo("false");
-        macheo("intLiteral");
-        macheo("stringLiteral");
-        macheo("charLiteral");
+        if(!macheo("nil") || !macheo("true") || !macheo("false") || !macheo("intLiteral") || !macheo("stringLiteral") || !macheo("charLiteral")){
+            //TODO error sintactico no machea
+        }
     }
-    
+    ///////////////////////////////////////////
     private void primario() throws ExcepcionSintactica {
-        expresionParentizada();
-        accesoSelf();
-        accesoVar();
-        llamadaMetodo();
-        llamadaMetodoEstatico();
-        llamadaConstructor();
+        if(true){ //TODO primeros de expresionParentizada
+            expresionParentizada();
+        }else{
+            if(true){ //TODO primeros de expresionParentizada
+                accesoSelf();
+            }else{
+                if(true){ //TODO primeros de expresionParentizada
+                    accesoVar();
+                }else{
+                    if(true){ //TODO primeros de expresionParentizada
+                        llamadaMetodo();
+                    }else{
+                        if(true){ //TODO primeros de expresionParentizada
+                            llamadaMetodoEstatico();
+                        }else{
+                            if(true){ //TODO primeros de expresionParentizada
+                                llamadaConstructor();
+                            }else{
+                                //TODO error sintactico no machea
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
     private void expresionParentizada() throws ExcepcionSintactica {
-        macheo("(");
-        expresion();
-        macheo(")");
-        encmul();
+        if(macheo("(")){
+            expresion();
+            if(macheo(")")){
+                encmul();
+            }else{
+                //TODO error sintactico no machea
+            }
+        }else{
+            //TODO error sintactico no machea
+        }
     }
     
     private void encmul() throws ExcepcionSintactica {
-        encadenado();
+        if(true){ //TODO primeros de encadenado
+            encadenado();
+        }
         //TODO lambda
     }
     
     private void accesoSelf() throws ExcepcionSintactica {
-        macheo("self");
-        encmul();
+        if(macheo("self")){
+            encmul();
+        }else{
+            //TODO error sintactico no machea
+        }
     }
     
     private void accesoVar() throws ExcepcionSintactica {
-        macheo("id");
-        encmul();
+        if(macheo("id")){
+            encmul();
+        }else{
+            //TODO error sintactico no machea
+        }
     }
     
     private void llamadaMetodo() throws ExcepcionSintactica {
-        macheo("id");
-        argumentosActuales();
-        encmul();
+        if(macheo("id")){
+            argumentosActuales();
+            encmul();
+        }else{
+            //TODO error sintactico no machea
+        }
+        
     }
     
     private void llamadaMetodoEstatico() throws ExcepcionSintactica {
-        macheo("id");
-        macheo(".");
-        llamadaMetodo();
-        encmul();
+        if(macheo("id") && macheo(".")){
+            llamadaMetodo();
+            encmul();
+        }else{
+            //TODO error sintactico no machea
+        }
+        
     }
     
     private void llamadaConstructor() throws ExcepcionSintactica {
-        macheo("new");
-        macheo("id");
-        argumentosActuales();
-        encmul();
+        if(macheo("new") && macheo("id")){
+            argumentosActuales();
+            encmul();
+        }else{
+            //TODO error sintactico no machea
+        }
+        
     }
     
     private void argumentosActuales() throws ExcepcionSintactica {
-        macheo("(");
-        listExp();
-        macheo(")");
+        if(macheo("(")){
+            listExp();
+            if(!macheo(")")){
+                //TODO error sintactico no machea
+            }
+        }else{
+            //TODO error sintactico no machea
+        }
+        
     }
     
     private void listExp() throws ExcepcionSintactica {
-        listaExpresiones();
+        if(true){ //TODO primeros de listaExpresiones
+            listaExpresiones();
+        }
         //TODO lambda
     }
     
@@ -608,27 +709,44 @@ public class AnalizadorSintactico {
     }
     
     private void listaExpresionesPrima() throws ExcepcionSintactica {
-        macheo(",");
-        listaExpresiones();
-        //TODO lambda
+        if(macheo(",")){
+            listaExpresiones();
+        }else{
+            //TODO lambda
+        }
     }
     
     private void encadenado() throws ExcepcionSintactica {
-        macheo(".");
-        llamadaMetodoencadenado();
+        if(macheo(".")){
+            if(true){ //TODO primeros de llamadaMetodoEncadenado
+                llamadaMetodoEncadenado();
+            }else{
+                if(true){ //TODO primeros de accesoVariableEncadenado
+                    accesoVariableEncadenado();
+                }else{
+                    //TODO error sintactico no machea
+                }
+            }
+        }else{
+            //TODO error sintactico no machea
+        }        
+    }
+    
+    private void llamadaMetodoEncadenado() throws ExcepcionSintactica {
+        if(macheo("id")){
+            argumentosActuales();
+            encmul();
+        }else{
+            //TODO error sintactico no machea
+        } 
         
-        macheo(".");
-        accesoVariableencadenado();
     }
     
-    private void llamadaMetodoencadenado() throws ExcepcionSintactica {
-        macheo("id");
-        argumentosActuales();
-        encmul();
-    }
-    
-    private void accesoVariableencadenado() throws ExcepcionSintactica {
-        macheo("id");
-        encmul();
+    private void accesoVariableEncadenado() throws ExcepcionSintactica {
+        if(macheo("id")){
+            encmul();
+        }else{
+            //TODO error sintactico no machea
+        } 
     }
 }
