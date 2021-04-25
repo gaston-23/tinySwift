@@ -3,7 +3,8 @@ package com.compiladores.compilador.etapa1;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
-import com.compiladores.compilador.etapa1.AnalizadorLexico.Token;
+import com.compiladores.compilador.etapa1.AnalizadorLexico;
+import com.compiladores.compilador.etapa1.Token;
 
 public class Ejecutador {
 
