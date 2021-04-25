@@ -31,6 +31,23 @@ public class AnalizadorSintactico {
             return true;
         }else return false;
     }
+    /**
+     * clase encargada de mirar el proximo no terminal Lookahead = 1
+     * @param w
+     * @return
+     * @throws ExcepcionSintactica 
+     */
+    private boolean verifico(String w) throws ExcepcionSintactica {
+        return (tokenActual.getValor().equals(w));            
+    }
+    private boolean verifico(String[] w) throws ExcepcionSintactica {
+        for (String string : w) {
+            if((tokenActual.getValor().equals(string))){
+                return true; 
+            }
+        }
+        return false;            
+    }
 
     private boolean program() throws ExcepcionSintactica {
         c();
@@ -40,11 +57,12 @@ public class AnalizadorSintactico {
     }
 
     private void c() throws ExcepcionSintactica {
-        
-        clase();
-        
-        c();
-        //TODO lambda
+        if( verifico("class") ){
+            clase();
+            c();
+        }else{
+            //TODO error sintactico no machea
+        }
     }
 
     private void claseMain() throws ExcepcionSintactica {
@@ -72,14 +90,26 @@ public class AnalizadorSintactico {
     }
 
     private void h() throws ExcepcionSintactica {
-        herencia();
-        //TODO lambda
+        if(verifico(":")){
+            herencia();
+        }else{
+            if(!verifico("{")){
+                //TODO error sintactico no machea
+            }
+        }
     }
 
     private void m() throws ExcepcionSintactica {
-        miembro();
-        m();
-        //TODO lambda
+        String[] args = {"private",  "static" , "init" , "let"};
+        if(verifico(args)){
+            miembro();
+            m();
+        }else{
+            String[] args2 = {"static func void main ()", "}"};
+            if(!verifico(args2)){
+                //TODO error sintactico no machea
+            }
+        }
     }
 
     private void clase() throws ExcepcionSintactica {
@@ -110,11 +140,26 @@ public class AnalizadorSintactico {
     }
 
     private void miembro() throws ExcepcionSintactica {
-        atributo();
-        metodo();
-        constante();
-        constructor();
-        //TODO primeros
+        if(verifico("private")){
+            atributo();
+        }else{
+            if(verifico("static")){
+                metodo();
+            }else{
+                if(verifico("init")){
+                    constructor();
+                }else{
+                    if(verifico("let")){
+                        constante();
+                    }else{
+                        String[] args2 = {"static func void main ()", "}"};
+                        if(!verifico(args2)){
+                            //TODO error sintactico no machea
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void constructor() throws ExcepcionSintactica {
@@ -142,13 +187,17 @@ public class AnalizadorSintactico {
             //TODO error sintactico no machea
         }
     }
-
     
     private void v() throws ExcepcionSintactica {
-        visibilidad();
-        //TODO  lambda
+        if(verifico("private")){
+            visibilidad();
+        }else{
+            if(!verifico("var")){
+                //TODO error sintactico no machea
+            }
+        }
     }
-    ///////////////////////
+    
     private void metodo() throws ExcepcionSintactica {
         f();
         if (macheo("func")){
@@ -165,8 +214,13 @@ public class AnalizadorSintactico {
     }
 
     private void f() throws ExcepcionSintactica {
-        formaMetodo();
-        //TODO  lambda
+        if(verifico("static")){
+            formaMetodo();
+        }else{
+            if(!verifico("func")){
+                //TODO error sintactico no machea
+            }
+        }
     }
 
     private void visibilidad() throws ExcepcionSintactica {
@@ -210,20 +264,34 @@ public class AnalizadorSintactico {
     }
 
     private void l() throws ExcepcionSintactica {
-        listaArgumentosFormales();
-        //TODO  lambda
+        String[] args = { "String" , "Bool" , "Int" , "Char" };
+        if(verifico(args)){
+            listaArgumentosFormales();
+        }else{
+            if(!verifico(")")){
+                //TODO error sintactico no machea
+            }
+        }
     }
 
     private void listaArgumentosFormales() throws ExcepcionSintactica {
-        argumentoFormal();
-        listaArgumentosFormalesPrima();
+        String[] args = { "String" , "Bool" , "Int" , "Char" };
+        if(verifico(args)){
+            argumentoFormal();
+            listaArgumentosFormalesPrima();
+        }else{
+            //TODO error sintactico no machea
+        }
     }
 
     private void listaArgumentosFormalesPrima() throws ExcepcionSintactica {
         if(macheo(",")){
             listaArgumentosFormales();
+        }else{
+            if(!verifico(")")){
+                //TODO error sintactico no machea
+            }
         }
-        //TODO  lambda
     }
 
     private void argumentoFormal() throws ExcepcionSintactica {
@@ -234,9 +302,10 @@ public class AnalizadorSintactico {
     }
 
     private void tipoMetodo() throws ExcepcionSintactica {
-        if(false){
+        String[] args = { "String","Bool","Int","Char","id" };
+        if(verifico(args)){
             tipo();
-        } //TODO primeros de tipo
+        } 
         else{
             if(!macheo("void")){
                 //TODO error sintactico no machea
@@ -245,8 +314,17 @@ public class AnalizadorSintactico {
     }
 
     private void tipo() throws ExcepcionSintactica {
-        tipoPrimitivo(); //TODO primeros de tipoPrimitivo
-        tipoReferencia(); //TODO primeros de tipoReferencia
+        String[] args = { "String","Bool","Int","Char"};
+        if(verifico(args)){
+            tipoPrimitivo(); //TODO primeros de tipoPrimitivo
+        }else{
+            if(verifico("id")){
+                tipoReferencia(); //TODO primeros de tipoReferencia
+            }else{
+                //TODO error sintactico no machea
+            }
+        }
+        
     }
 
     private void tipoPrimitivo() throws ExcepcionSintactica {
@@ -277,20 +355,27 @@ public class AnalizadorSintactico {
     }
 
     private void s() throws ExcepcionSintactica {
-        sentencia();
-        s();
-        //TODO  lambda
+        String[] args = { ";" , "var" , "if", "let" , "while" , "return" , "id" , "self" , "(" , "{"};
+        if(verifico(args)){
+            sentencia();
+            s();
+        }else{
+            if(!verifico("}")){
+                //TODO error sintactico no machea
+            }
+        }
     }
     
     private void sentencia() throws ExcepcionSintactica {
         if(!macheo(";")){
-            if(true){ //TODO primeros de asignacion
+            String[] args = { "id" , "self" };
+            if(verifico(args)){ //TODO primeros de asignacion
                 asignacion();
                 if(!macheo(";")){
                      //TODO error sintactico no machea
                 }
             }else{
-                if(true){ //TODO primeros de sentenciaSimple
+                if(verifico("(")){ //TODO primeros de sentenciaSimple
                     sentenciaSimple();
                     if(!macheo(";")){
                         //TODO error sintactico no machea
@@ -307,7 +392,7 @@ public class AnalizadorSintactico {
                             //TODO error sintactico no machea
                         }
                     }else{
-                        if(macheo("if") && macheo("(")){
+                        if(macheo("if") && macheo("(")){ //TODO TEST
                             expresion();
                             if(macheo(")")){
                                 sentencia();
@@ -341,7 +426,7 @@ public class AnalizadorSintactico {
                                             //TODO error sintactico no machea
                                         }
                                     }else{
-                                        if(true){//TODO primeros de bloque
+                                        if(verifico("{")){//TODO primeros de bloque
                                             bloque();
                                         }else{
                                             //TODO error sintactico no machea
@@ -360,38 +445,52 @@ public class AnalizadorSintactico {
         if(macheo("else")){
             sentencia();
         }else{
-            //TODO lambda
+            if(verifico("}")){ //TODO TEST
+                //TODO error sintactico no machea
+            }
         }
-        
     }
     
     private void x() throws ExcepcionSintactica {
-        expresion();
-        //TODO lambda
+        String[] args = {"+" , "-" , "!" , "nil" , "true" , "false" , "intLiteral" , "stringLiteral" , "charLiteral" , "(" , "self" , "id" , "new"};
+        if(verifico(args)){
+            expresion();
+        }else{
+            String[] args2 = {")" , ";"};
+            if(!verifico(args2)){
+                //TODO error sintactico no machea
+            }
+        }
     }
     
     private void listaDeclaracionVariables() throws ExcepcionSintactica {
         if(macheo("id")){
             listaDeclaracionVariablesPrima();
+        }else{
+            //TODO error sintactico no machea
         }
-        
     }
     
     private void listaDeclaracionVariablesPrima() throws ExcepcionSintactica {
         if(macheo(",")){
             listaDeclaracionVariables();
         }else{
-            //TODO lambda
+            if(!verifico(";")){
+                //TODO error sintactico no machea
+            }
         }
-        
     }
     
     private void asignacion() throws ExcepcionSintactica {
-        if(true){ //TODO primeros accesoVarSimple
+        if(verifico("id")){ //TODO primeros accesoVarSimple
             accesoVarSimple();
             
         }else{ //TODO primeros accesoSelfSimple
-            accesoSelfSimple();
+            if(verifico("self")){
+                accesoSelfSimple();
+            }else{
+                //TODO error sintactico no machea
+            }
         }
         if(macheo("=")){
             expresion();
@@ -417,13 +516,14 @@ public class AnalizadorSintactico {
     }
     
     private void enc() throws ExcepcionSintactica {
-        if(true){ //TODO primeros encadenadoSimple
+        if(verifico(".")){ //TODO primeros encadenadoSimple
             encadenadoSimple();
             enc();
         }else{
-            //TODO lambda
+            if(verifico("=")){
+                //TODO error sintactico no machea
+            }
         }
-        
     }
     
     private void encadenadoSimple() throws ExcepcionSintactica {
@@ -457,10 +557,11 @@ public class AnalizadorSintactico {
             expAnd();
             expOrPrima();
         }else{
-            //TODO lambda
+            String[] args= {")" , ";"};
+            if(!verifico(args)){
+                //TODO error sintactico no machea
+            }
         }
-        
-        
     }
     
     private void expAnd() throws ExcepcionSintactica {
@@ -473,7 +574,10 @@ public class AnalizadorSintactico {
             expIgual();
             expAndPrima();
         }else{
-            //TODO lambda
+            String[] args= {"||" , ")" , ";"};
+            if(!verifico(args)){
+                //TODO error sintactico no machea
+            }
         }
     }
     
@@ -483,10 +587,17 @@ public class AnalizadorSintactico {
     }
     
     private void expIgualPrima() throws ExcepcionSintactica {
-        opIgual();
-        expCompuesta();
-        expIgualPrima();
-        //TODO lambda
+        String[] args = {"==" , "!="};
+        if(verifico(args)){
+            opIgual();
+            expCompuesta();
+            expIgualPrima();
+        }else{
+           String[] args2 = {"&&" , "||" , ")" , ";"};
+            if(!verifico(args2)){
+                //TODO error sintactico no machea
+            }
+        }
     }
     
     private void expCompuesta() throws ExcepcionSintactica {
@@ -495,9 +606,16 @@ public class AnalizadorSintactico {
     }
     
     private void expCompuestaPrima() throws ExcepcionSintactica {
-        opCompuesto();
-        expAdd();
-        //TODO lambda
+        String[] args = {"<" , ">" , "<=" , ">="};
+        if(verifico(args)){
+            opCompuesto();
+            expAdd();
+        }else{
+            String[] args2 = {"==" , "!=" , "&&" , "||" , ")" , ";"};
+            if(verifico(args)){
+                //TODO error sintactico no machea
+            }
+        }
     }
     
     private void expAdd() throws ExcepcionSintactica {
@@ -506,10 +624,17 @@ public class AnalizadorSintactico {
     }
     
     private void expAddPrima() throws ExcepcionSintactica {
-        opAdd();
-        expMul();
-        expAddPrima();
-        //TODO lambda
+        String[] args = { "+" , "-"};
+        if(verifico(args)){
+            opAdd();
+            expMul();
+            expAddPrima();
+        }else{
+            String[] args2 = { "!" , "nil" , "true" , "false" , "intLiteral" , "stringLiteral" , "charLiteral" , "(" , "self" , "id" , "new" , "==" , "!=" , "&&" , "||" , ")" , ";"};
+            if(verifico(args2)){
+                //TODO error sintactico no machea
+            }
+        }
     }
     
     private void expMul() throws ExcepcionSintactica {
@@ -518,22 +643,32 @@ public class AnalizadorSintactico {
     }
     
     private void expMulPrima() throws ExcepcionSintactica {
-        opMul();
-        expUn();
-        expMulPrima();
-        //TODO lambda
+        String[] args = {"*" , "/" , "%"};
+        if(verifico(args)){
+            opMul();
+            expUn();
+            expMulPrima();  
+        }else{
+            String[] args2 = {"+" , "-" , "!" , "nil" , "true" , "false" , "intLiteral" , "stringLiteral" , "charLiteral" , "(" , "self" , "id" , "new" , "==" , "!=" , "&&" , "||" , ")" , ";"};
+            if(!verifico(args2)){
+                //TODO error sintactico no machea
+            }
+        }
     }
     
     private void expUn() throws ExcepcionSintactica {
-        if(true){ //TODO primeros opUnario
+        String[] args = {"+" , "-" , "!"};
+        if(verifico(args)){ 
             opUnario();
             expUn();
-        }else{ //TODO primeros operando
-            operando();
+        }else{ 
+            String[] args2 = {"nil" , "true" , "false" , "intLiteral" , "stringLiteral" , "charLiteral" , "(" , "self" , "id" , "new"};
+            if(verifico(args2)){
+                operando();
+            }else{
+                //TODO error sintactico no machea
+            }  
         }
-        
-        
-        
     }
     
     private void opIgual() throws ExcepcionSintactica {
@@ -542,7 +677,6 @@ public class AnalizadorSintactico {
                 //TODO error sintactico no machea
             }
         }
-        
     }
     
     private void opCompuesto() throws ExcepcionSintactica {
@@ -570,10 +704,12 @@ public class AnalizadorSintactico {
     }
     
     private void operando() throws ExcepcionSintactica {
-        if(true){ //TODO primeros de literal
+        String[] args = {"nil" , "true" , "false" , "intLiteral" , "stringLiteral" , "charLiteral"};
+        if(verifico(args)){ 
             literal();
         }else{
-            if(true){ //TODO primeros de primario
+            String[] args2 = {"(" , "self" , "id" , "new"};
+            if(verifico(args2)){ 
                 primario();
                 encmul();
             }else{
@@ -589,29 +725,35 @@ public class AnalizadorSintactico {
             //TODO error sintactico no machea
         }
     }
+    
     ///////////////////////////////////////////
     private void primario() throws ExcepcionSintactica {
-        if(true){ //TODO primeros de expresionParentizada
+        if(verifico("(")){ //TODO primeros de expresionParentizada
             expresionParentizada();
         }else{
-            if(true){ //TODO primeros de expresionParentizada
+            if(verifico("self")){ //TODO primeros de accesoSelf
                 accesoSelf();
             }else{
-                if(true){ //TODO primeros de expresionParentizada
-                    accesoVar();
+                if(verifico("new")){ //TODO primeros de accesoVar
+                    llamadaConstructor();
                 }else{
-                    if(true){ //TODO primeros de expresionParentizada
-                        llamadaMetodo();
-                    }else{
-                        if(true){ //TODO primeros de expresionParentizada
+                    if(verifico("id")){ //TODO primeros de llamadaMetodo
+                        if(verifico(".")){
+                            llamadaMetodo();
+                        }else{
+                            
+                        }
+                        
+                        if(verifico("(")){ //TODO primeros de llamadaMetodoEstatico
                             llamadaMetodoEstatico();
                         }else{
-                            if(true){ //TODO primeros de expresionParentizada
-                                llamadaConstructor();
+                            if(verifico("(")){ //TODO primeros de llamadaConstructor
+                                accesoVar();
                             }else{
-                                //TODO error sintactico no machea
                             }
                         }
+                    }else{
+                            //TODO error sintactico no machea
                     }
                 }
             }
@@ -631,6 +773,7 @@ public class AnalizadorSintactico {
         }
     }
     
+    ///////////////////////////
     private void encmul() throws ExcepcionSintactica {
         if(true){ //TODO primeros de encadenado
             encadenado();
@@ -697,10 +840,14 @@ public class AnalizadorSintactico {
     }
     
     private void listExp() throws ExcepcionSintactica {
-        if(true){ //TODO primeros de listaExpresiones
+        String[] args = {"+" , "-" , "!" , "nil" , "true" , "false" , "intLiteral" , "stringLiteral" , "charLiteral" , "(" , "self" , "id" , "new" };
+        if(verifico(args)){ //TODO primeros de listaExpresiones
             listaExpresiones();
+        }else{
+            if(!verifico(")")){
+                //TODO error sintactico no machea
+            }
         }
-        //TODO lambda
     }
     
     private void listaExpresiones() throws ExcepcionSintactica {
@@ -712,10 +859,13 @@ public class AnalizadorSintactico {
         if(macheo(",")){
             listaExpresiones();
         }else{
-            //TODO lambda
+            if(!verifico(")")){
+                //TODO error sintactico no machea
+            }
         }
     }
     
+    /////////////////////////////////
     private void encadenado() throws ExcepcionSintactica {
         if(macheo(".")){
             if(true){ //TODO primeros de llamadaMetodoEncadenado
