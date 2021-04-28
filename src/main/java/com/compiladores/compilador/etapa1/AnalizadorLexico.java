@@ -43,7 +43,12 @@ public class AnalizadorLexico {
                     break;
                 }
             }
-            if (exito) System.out.println("CORRECTO: ANALISIS LEXICO");
+            if (exito) {
+                Token token = new Token(fila, 0, "EOF", "EOF");
+                this.addToken(token);
+		
+                System.out.println("CORRECTO: ANALISIS LEXICO");
+            }
 			
 	}
 	/**
@@ -475,15 +480,15 @@ public class AnalizadorLexico {
                                                 i++;
 					}
 					//literal entero
-					if((int)linea[i] > 47 && (int)linea[i] < 58 ) {
+					if((int)linea[i] > 47 && (int)linea[i] < 58 && curToken.equals("")) {
 						
 						//si habia algun token se guarda
-						if(!curToken.equals("") && (!state.equals("lit_cad") || !state.equals("lit_car") || !state.equals("id_clase") || !state.equals("id_objeto"))) {
-							// guarda lo que tenia
-							Token token = new Token(fila, i - curToken.length() +1, state, curToken);
-							this.addToken(token);
-							curToken = "";
-							state = "";
+						if(!curToken.equals("") && (!state.equals("lit_cad") && !state.equals("lit_car") && !state.equals("lit_ent") && !state.equals("id_clase") && !state.equals("id_objeto"))) {
+                                                    // guarda lo que tenia
+                                                    Token token = new Token(fila, i - curToken.length() +1, state, curToken);
+                                                    this.addToken(token);
+                                                    curToken = "";
+                                                    state = "";
 						}//literal entero
 						curToken += linea[i];
 						state = "lit_ent";
@@ -554,40 +559,48 @@ public class AnalizadorLexico {
 						state = "id_objeto";
 						continue;
 					}
-					if(((linea[i] < 91 && linea[i] > 64) || (linea[i] < 123 && linea[i] > 96) || linea[i] == '_') && !curToken.equals("")) {
-						curToken += linea[i];
-						if( state.equals("lit_ent")){
-							//throw error empieza con numero
-							throw new ExcepcionLexica(fila, i, "el identificador comienza con digito", curToken);
-						}
-						if((curToken.equals("class") 	|| 
-							curToken.equals("else") 	||
-							curToken.equals("false")	||
-							curToken.equals("if") 		||
-							curToken.equals("let") 		||
-							curToken.equals("while")	||
-							curToken.equals("not") 		||
-							curToken.equals("true") 	||
-							curToken.equals("new") 		||
-							curToken.equals("nil") 		||
-							curToken.equals("init") 		||
-							curToken.equals("var") 		||
-							curToken.equals("private") 		||
-							curToken.equals("func") 		||
-							curToken.equals("static") 		||
-							curToken.equals("return") 		||
-							curToken.equals("self") 		||
-							curToken.equals("void") 		||
-							curToken.equals("Int") 		||
-							curToken.equals("Bool") 		||
-							curToken.equals("Char") 		||
-							curToken.equals("String")	) 	&& 
-							(i+1 < linea.length && !((linea[i+1] < 91 && linea[i+1] > 64) || (linea[i+1] < 123 && linea[i+1] > 96) || linea[i+1] == '_'))){
-								Token token = new Token(fila, i - curToken.length() +1, "p_"+curToken, curToken);
-								this.addToken(token);
-								curToken = "";
-								state = "";
-							}
+					if(((linea[i] < 91 && linea[i] > 64) || (linea[i] < 123 && linea[i] > 96) || linea[i] == '_' || ((int)linea[i] > 47 && (int)linea[i] < 58)) && !curToken.equals("")) {
+                                            if(!state.startsWith("lit") && !state.startsWith("id") && !curToken.equals("")){
+                                                Token token = new Token(fila, i - curToken.length() , state, curToken);
+                                                this.addToken(token);
+                                                curToken = "";
+                                                state = "";
+                                                i--;
+                                                continue;
+                                            }
+                                            curToken += linea[i];
+                                            if( state.equals("lit_ent")){
+                                                    //throw error empieza con numero
+                                                    throw new ExcepcionLexica(fila, i, "el identificador comienza con digito", curToken);
+                                            }
+                                            if((curToken.equals("class")            || 
+                                                    curToken.equals("else") 	||
+                                                    curToken.equals("false")	||
+                                                    curToken.equals("if") 		||
+                                                    curToken.equals("let") 		||
+                                                    curToken.equals("while")	||
+                                                    curToken.equals("not") 		||
+                                                    curToken.equals("true") 	||
+                                                    curToken.equals("new") 		||
+                                                    curToken.equals("nil") 		||
+                                                    curToken.equals("init") 	||
+                                                    curToken.equals("var") 		||
+                                                    curToken.equals("private") 	||
+                                                    curToken.equals("func") 	||
+                                                    curToken.equals("static") 	||
+                                                    curToken.equals("return") 	||
+                                                    curToken.equals("self") 	||
+                                                    curToken.equals("void") 	||
+                                                    curToken.equals("Int") 		||
+                                                    curToken.equals("Bool") 	||
+                                                    curToken.equals("Char") 	||
+                                                    curToken.equals("String")	) 	&& 
+                                                    (i+1 < linea.length && !((linea[i+1] < 91 && linea[i+1] > 64) || (linea[i+1] < 123 && linea[i+1] > 96) || linea[i+1] == '_'))){
+                                                            Token token = new Token(fila, i - curToken.length() +1, "p_"+curToken, curToken);
+                                                            this.addToken(token);
+                                                            curToken = "";
+                                                            state = "";
+                                                    }
 							
 					}
 					
@@ -598,7 +611,7 @@ public class AnalizadorLexico {
 		if(state.equals("lit_cad")) {
                     throw new ExcepcionLexica(fila, linea.length, "se esperaba \"","fin de linea");
                 }
-		return 0;
+                return 0;
 	}
 	
 	
