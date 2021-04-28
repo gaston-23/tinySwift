@@ -86,6 +86,7 @@ public class AnalizadorLexico {
 			if(comentario == 1 ) {
 				if( ( i+1 < linea.length && (""+linea[i]+linea[i+1]).equals("*/"))) {
 					comentario = 0; //finaliza el comentario multilinea
+                                        i++;
 				}
 				continue;
 			}
@@ -520,7 +521,7 @@ public class AnalizadorLexico {
 						//lit caracter
 						if((""+linea[i]+linea[i+1]).equals("'\\") && linea[i+3]=='\'') {
                                                     if("btnfr'\"\\".contains(""+linea[i+2])){
-                                                        Token token = new Token(fila, i , "int_car" , ""+ linea[i]+ linea[i+1]+ linea[i+2]+ linea[i+3]);
+                                                        Token token = new Token(fila, i , "lit_car" , ""+ linea[i]+ linea[i+1]+ linea[i+2]+ linea[i+3]);
 							this.addToken(token);
 							i += 3;
                                                     }else{
@@ -530,7 +531,7 @@ public class AnalizadorLexico {
 							
 						}else {
 							if( linea[i+2] == '\'') {
-								Token token = new Token(fila, i , "int_car" , ""+ linea[i]+ linea[i+1]+ linea[i+2] );
+								Token token = new Token(fila, i , "lit_car" , ""+ linea[i]+ linea[i+1]+ linea[i+2] );
 								this.addToken(token);
 								i += 2;
 							}else {

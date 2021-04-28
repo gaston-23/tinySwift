@@ -1,4 +1,8 @@
-com/compiladores/compilador/etapa1/AnalizadorLexico.class
+com/compiladores/compilador/etapa2/EjecutadorSintactico.class
+com/compiladores/compilador/etapa2/ExcepcionSintactica.class
 com/compiladores/compilador/etapa1/AnalizadorLexico$ExcepcionLexica.class
-com/compiladores/compilador/etapa1/AnalizadorLexico$Token.class
+com/compiladores/compilador/etapa1/Token.class
+com/compiladores/compilador/etapa2/AnalizadorSintactico.class
 com/compiladores/compilador/etapa1/Ejecutador.class
+com/compiladores/compilador/etapa1/AnalizadorLexico.class
+com/compiladores/compilador/main/Main.class

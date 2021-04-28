@@ -1,2 +1,7 @@
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa2/EjecutadorSintactico.java
 /home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa1/Ejecutador.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/main/Main.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa2/ExcepcionSintactica.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa1/Token.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa2/AnalizadorSintactico.java
 /home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa1/AnalizadorLexico.java
