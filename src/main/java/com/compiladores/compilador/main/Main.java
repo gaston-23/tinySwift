@@ -15,4 +15,10 @@ import com.compiladores.compilador.etapa2.*;
  */
 public class Main {
     
+    public static void main(String[] args) {
+        
+        AnalizadorLexico aL = new AnalizadorLexico(args[0]);
+        AnalizadorSintactico aS = new AnalizadorSintactico(aL);
+        
+    }
 }

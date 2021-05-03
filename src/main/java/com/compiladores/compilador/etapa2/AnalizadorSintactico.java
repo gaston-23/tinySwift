@@ -10,7 +10,8 @@ import com.compiladores.compilador.etapa1.Token;
 
 
 /**
- *
+ * Clase AnalizadorSintactico
+ * Se encarga de corroborar, a partir de una lista de tokens, si el codigo fuente coincide con la gramatica
  * @author Gaston Cavallo
  * @author Mariel Volman
  */
@@ -19,39 +20,54 @@ public class AnalizadorSintactico {
     private Token tokenActual ;
     private AnalizadorLexico al;
     
-    public AnalizadorSintactico (AnalizadorLexico aL) {
+    /**
+    * Constructor AnalizadorSintactico
+    * inicializa el objeto AnalizadorLexico y comienza verificando la gramatica a partir del nodo incial "program", si llega al final de la gramatica
+    * y encuentra el token 'EOF' finaliza su ejecucion con exito
+    * @author Gaston Cavallo
+    * @author Mariel Volman
+    */
+   public AnalizadorSintactico (AnalizadorLexico aL) {
         this.al = aL;
         this.tokenActual = al.nextToken();
         boolean exito = true;
         try{
             this.program();
-
         }catch(ExcepcionSintactica eS){
             System.out.println(eS.mensaje);
             exito = false;
         }
         if(exito) System.out.println("CORRECTO: ANALISIS SINTACTICO");
     }
-
-    private boolean macheo(String w) throws ExcepcionSintactica {
-        System.out.println("mach: v: "+tokenActual.getValor()+" p: "+tokenActual.getpReservada());
+    
+    /**
+    * funcion macheo
+    * se encarga de machear el token con la cadena w, si coincide pide un nextToken al AnalizadorLexico y retorna true
+    * @param w
+    * @return
+    * @throws ExcepcionSintactica 
+    */
+    private boolean macheo(String w){
         if(tokenActual.getValor().equals(w) || tokenActual.getpReservada().equals(w)){
             this.tokenActual = this.al.nextToken();
             return true;
         }else return false;
     }
     /**
-     * clase encargada de mirar el proximo no terminal Lookahead = 1
+     * metodo encargado de mirar el proximo no terminal recibiendo un String (Lookahead = 1) y corrobora si coinciden sin machear
      * @param w
      * @return
      * @throws ExcepcionSintactica 
      */
-    private boolean verifico(String w) throws ExcepcionSintactica {
-        System.out.println("ver: v: "+tokenActual.getValor()+" p: "+tokenActual.getpReservada());
+    private boolean verifico(String w){
         return (tokenActual.getValor().equals(w) || tokenActual.getpReservada().equals(w));            
     }
-    private boolean verifico(String[] w) throws ExcepcionSintactica {
-        System.out.println("ver: v: "+tokenActual.getValor()+" p: "+tokenActual.getpReservada());
+    /**
+     * metodo encargado de mirar el proximo no terminal si coincide con algun elemento del array de Strings
+     * @param w
+     * @return 
+     */
+    private boolean verifico(String[] w){
         for (String string : w) {
             if(tokenActual.getValor().equals(string) || tokenActual.getpReservada().equals(string)){
                 return true; 
@@ -60,52 +76,55 @@ public class AnalizadorSintactico {
         return false;            
     }
 
-    private boolean program() throws ExcepcionSintactica {
+    /**
+     * Primer no terminal que da comienzo a la gramatica
+     * @throws ExcepcionSintactica 
+     */
+    private void program() throws ExcepcionSintactica {
         if(macheo("class")){
            c(); 
         }else{
-            if(verifico("EOF")){
-                return true;  
-            }else{
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'class' o 'EOF'", tokenActual.getValor());
+        }
+    }
+    
+    private void programPrima() throws ExcepcionSintactica {
+        if(macheo("class")){
+           c(); 
+        }else{
+            if(!verifico("EOF")){
                 throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'class' o 'EOF'", tokenActual.getValor());
             }
         }
-        return true;
     }
 
     private void c() throws ExcepcionSintactica {
         if( verifico("id_clase") ){
             clase();
-            program();
+            programPrima();
         }else{
             if(verifico("Main")){
                 claseMain();
             }else{
-                System.out.println("c");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'class' o EOF", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'class' o EOF", tokenActual.getValor());
             }
         }
     }
     
     private void claseMain() throws ExcepcionSintactica {
-        System.out.println("33333333333333333333333333333333333333333");
         if( macheo("Main")){
             h();
             if(macheo("{")){
                 m();
-                if(macheo("static") && macheo("func") && macheo("void") && macheo("main") && macheo("(") && macheo(")")){
-                    bloque();
-                    m();
-                    if(!macheo("}")){
-                        System.out.println("claseMain");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '}'", tokenActual.getValor());
-                    }
-                }else{
-                    System.out.println("claseMain");            throw new ExcepcionSintactica(tokenActual,"se esperaba una declaracion de tipo 'static func void main ()'", tokenActual.getValor());
+                bloque();
+                m();
+                if(!macheo("}")){
+                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token '}'", tokenActual.getValor());
                 }
             }else{
-                System.out.println("claseMain");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '{'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '{'", tokenActual.getValor());
             }
         }else{
-            System.out.println("claseMain");
             throw new ExcepcionSintactica(tokenActual,"se esperaba una declaracion de tipo 'class Main'", tokenActual.getValor());
         }
     }
@@ -115,22 +134,26 @@ public class AnalizadorSintactico {
             herencia();
         }else{
             if(!verifico("{")){
-                System.out.println("h");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':' o '{'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':' o '{'", tokenActual.getValor());
             }
         }
     }
-
+    
     private void m() throws ExcepcionSintactica {
-        String[] args = {"private",  "static" , "init" , "let", "var", "func"};
-        if(verifico(args)){
-            miembro();
-            m();
-        }else{
-            String[] args2 = {"static func void main ()", "}"};
-            if(!verifico(args2)){
-                System.out.println("m");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'private',  'static' , 'init' , 'let', 'var', 'func', '{' o una declaracion de tipo 'static func void main ()'", tokenActual.getValor());
+        if(!main() && !verifico("}")){
+            String[] args = {"private",  "static" , "init" , "let", "var", "func"};
+            if(verifico(args)){
+                miembro();
+                m();
+            }else{
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'private',  'static' , 'init' , 'let', 'var', 'func', '{' o una declaracion de tipo 'static func void main ()'", tokenActual.getValor());
+
             }
         }
+    }
+    
+    private boolean main() throws ExcepcionSintactica {
+        return (macheo("static") && macheo("func") && macheo("void")  && macheo("main") && macheo("(") && macheo(")")) ;
     }
 
     private void clase() throws ExcepcionSintactica {
@@ -139,14 +162,14 @@ public class AnalizadorSintactico {
             if( macheo("{") ){
                m();
                if( !macheo("}") ){ 
-                   System.out.println("clase");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '}'", tokenActual.getValor());
+                   throw new ExcepcionSintactica(tokenActual,"se esperaba un token '}'", tokenActual.getValor());
                }
             }else {
-                System.out.println("clase");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '}'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '}'", tokenActual.getValor());
             }
 
         }else {
-            System.out.println("clase");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token  'id_clase'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token  'id_clase'", tokenActual.getValor());
         }
         
     }
@@ -155,7 +178,7 @@ public class AnalizadorSintactico {
         if(macheo(":")){
             tipo();
         }else{
-            System.out.println("herencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':'", tokenActual.getValor());
         }
         
     }
@@ -173,7 +196,7 @@ public class AnalizadorSintactico {
                     if(verifico("let")){
                         constante();
                     }else{
-                        System.out.println("miembro");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'private',  'static' , 'init' , 'let'", tokenActual.getValor());
+                        throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'private',  'static' , 'init' , 'let'", tokenActual.getValor());
                     }
                 }
             }
@@ -185,7 +208,7 @@ public class AnalizadorSintactico {
             argumentosFormales();
             bloque();
         }else{
-            System.out.println("constructor");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'init'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'init'", tokenActual.getValor());
         }
     }
 
@@ -196,13 +219,13 @@ public class AnalizadorSintactico {
             if(macheo(":")){
                 listaDeclaracionVariables();
                 if(!macheo(";")){
-                    System.out.println("atributo");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
+                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
                 }
             }else{
-                System.out.println("atributo");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':'", tokenActual.getValor());
             }
         }else{
-            System.out.println("atributo");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'var'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'var'", tokenActual.getValor());
         }
     }
     
@@ -211,7 +234,7 @@ public class AnalizadorSintactico {
             visibilidad();
         }else{
             if(!verifico("var")){
-                System.out.println("v");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'var'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'var'", tokenActual.getValor());
             }
         }
     }
@@ -224,10 +247,10 @@ public class AnalizadorSintactico {
                 argumentosFormales();
                 bloque();
             }else{
-                System.out.println("metodo");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto'", tokenActual.getValor());
             }
         }else{
-            System.out.println("metodo");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'func'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'func'", tokenActual.getValor());
         }
     }
 
@@ -236,20 +259,20 @@ public class AnalizadorSintactico {
             formaMetodo();
         }else{
             if(!verifico("func")){
-                System.out.println("f");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'static' o 'func'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'static' o 'func'", tokenActual.getValor());
             }
         }
     }
 
     private void visibilidad() throws ExcepcionSintactica {
         if(!macheo("private")){
-            System.out.println("visibilidad");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'private'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'private'", tokenActual.getValor());
         }
     }
 
     private void formaMetodo() throws ExcepcionSintactica {
         if(!macheo("static")){
-            System.out.println("formaMetodo");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'static'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'static'", tokenActual.getValor());
         }
     }
 
@@ -259,13 +282,13 @@ public class AnalizadorSintactico {
             if(macheo(":") && macheo("id_objeto") && macheo("=")){
                 expresion();
                 if(!macheo(";")){
-                    System.out.println("constante");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
+                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
                 }
             }else{
-                System.out.println("constante");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':' , 'id_objeto' o '='", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':' , 'id_objeto' o '='", tokenActual.getValor());
             }
         }else{
-            System.out.println("constante");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'let' ", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'let' ", tokenActual.getValor());
         }
     }
 
@@ -273,10 +296,10 @@ public class AnalizadorSintactico {
         if(macheo("(")){
             l();
             if(!macheo(")")){
-                System.out.println("argumentosFormales");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')' ", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')' ", tokenActual.getValor());
             }
         }else{
-            System.out.println("argumentosFormales");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '(' ", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '(' ", tokenActual.getValor());
         }
         
     }
@@ -287,7 +310,7 @@ public class AnalizadorSintactico {
             listaArgumentosFormales();
         }else{
             if(!verifico(")")){
-                System.out.println("l");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char'", tokenActual.getValor());
             }
         }
     }
@@ -298,7 +321,7 @@ public class AnalizadorSintactico {
             argumentoFormal();
             listaArgumentosFormalesPrima();
         }else{
-            System.out.println("listaArgumentosFormales");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char'", tokenActual.getValor());
         }
     }
 
@@ -307,7 +330,7 @@ public class AnalizadorSintactico {
             listaArgumentosFormales();
         }else{
             if(!verifico(")")){
-                System.out.println("listaArgumentosFormalesPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ',' o ')'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ',' o ')'", tokenActual.getValor());
             }
         }
     }
@@ -315,7 +338,7 @@ public class AnalizadorSintactico {
     private void argumentoFormal() throws ExcepcionSintactica {
         tipo();
         if(!macheo(":") || !macheo("id_objeto")){
-            System.out.println("argumentoFormal");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':' o 'id_objeto'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':' o 'id_objeto'", tokenActual.getValor());
         }
     }
 
@@ -325,7 +348,7 @@ public class AnalizadorSintactico {
             tipo();
         }else{
             if(!macheo("void")){
-                System.out.println("tipoMetodo");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char' o 'id_clase", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char' o 'id_clase", tokenActual.getValor());
             }
         }
     }
@@ -338,7 +361,7 @@ public class AnalizadorSintactico {
             if(verifico("id_clase")){
                 tipoReferencia(); 
             }else{
-                System.out.println("tipo");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char' o 'id_clase", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char' o 'id_clase", tokenActual.getValor());
             }
         }
         
@@ -349,7 +372,7 @@ public class AnalizadorSintactico {
             if(!macheo("Bool")){
                 if(!macheo("Int")){
                     if(!macheo("Char")){
-                        System.out.println("tipoPrimitivo");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char'", tokenActual.getValor());
+                        throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char'", tokenActual.getValor());
                     }
                 }
             }
@@ -358,7 +381,7 @@ public class AnalizadorSintactico {
 
     private void tipoReferencia() throws ExcepcionSintactica {
         if(!macheo("id_clase")){
-            System.out.println("tipoReferencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_clase'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_clase'", tokenActual.getValor());
         }
     }
 
@@ -366,7 +389,7 @@ public class AnalizadorSintactico {
         if(macheo("{")){
            s(); 
             if(!macheo("}")){
-                System.out.println("bloque");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '{'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '{'", tokenActual.getValor());
             }
         }
     }
@@ -378,7 +401,7 @@ public class AnalizadorSintactico {
             s();
         }else{
             if(!verifico("}")){
-                System.out.println("s");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';' , 'var' , 'if', 'let' , 'while' , 'return' , 'id_objeto' , 'self' , '(' , '{' , '}'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';' , 'var' , 'if', 'let' , 'while' , 'return' , 'id_objeto' , 'self' , '(' , '{' , '}'", tokenActual.getValor());
             }
         }
     }
@@ -389,13 +412,13 @@ public class AnalizadorSintactico {
             if(verifico(args)){
                 asignacion();
                 if(!macheo(";")){
-                    System.out.println("sentencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
+                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
                 }
             }else{
                 if(verifico("(")){
                     sentenciaSimple();
                     if(!macheo(";")){
-                        System.out.println("sentencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
+                        throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
                     }
                 }else{
                     if(macheo("var")){
@@ -403,10 +426,10 @@ public class AnalizadorSintactico {
                         if(macheo(":")){
                             listaDeclaracionVariables();
                             if(!macheo(";")){
-                                System.out.println("sentencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
+                                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
                             }
                         }else{
-                            System.out.println("sentencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':'", tokenActual.getValor());
+                            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':'", tokenActual.getValor());
                         }
                     }else{
                         if(macheo("if") && macheo("(")){ //TODO TEST
@@ -415,7 +438,7 @@ public class AnalizadorSintactico {
                                 sentencia();
                                 sentenciaPrima();
                             }else{
-                                System.out.println("sentencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'if' , '(' o ')'", tokenActual.getValor());
+                                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'if' , '(' o ')'", tokenActual.getValor());
                             }
                         }else{
                             if(macheo("let")){
@@ -423,10 +446,10 @@ public class AnalizadorSintactico {
                                 if(macheo(":") && macheo("id_objeto") && macheo("=")){
                                     expresion();
                                     if(!macheo(";")){
-                                        System.out.println("sentencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
+                                        throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
                                     }
                                 }else{
-                                    System.out.println("sentencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':', 'id_objeto', '='", tokenActual.getValor());
+                                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':', 'id_objeto', '='", tokenActual.getValor());
                                 }
                             }else{
                                 if(macheo("while") && macheo("(")){
@@ -434,19 +457,19 @@ public class AnalizadorSintactico {
                                     if(macheo(")")){
                                         sentencia();
                                     }else{
-                                        System.out.println("sentencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')'", tokenActual.getValor());
+                                        throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')'", tokenActual.getValor());
                                     }
                                 }else{
                                     if(macheo("return")){ 
                                         x();
                                         if(!macheo(";")){
-                                            System.out.println("sentencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
+                                            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
                                         }
                                     }else{
                                         if(verifico("{")){
                                             bloque();
                                         }else{
-                                            System.out.println("sentencia");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '{', 'return', 'while', '(', 'let', 'if', 'var', 'self' ", tokenActual.getValor());
+                                            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '{', 'return', 'while', '(', 'let', 'if', 'var', 'self' ", tokenActual.getValor());
                                         }
                                     }
                                 }
@@ -463,7 +486,7 @@ public class AnalizadorSintactico {
             sentencia();
         }else{
             if(!verifico("}")){ //TODO TEST
-                System.out.println("sentenciaPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '}' o 'else'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '}' o 'else'", tokenActual.getValor());
             }
         }
     }
@@ -475,7 +498,7 @@ public class AnalizadorSintactico {
         }else{
             String[] args2 = {")" , ";"};
             if(!verifico(args2)){
-                System.out.println("x");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-' , '!' , 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car' , '(' , 'self' , 'id_objeto' , 'new', ')' , ';'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-' , '!' , 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car' , '(' , 'self' , 'id_objeto' , 'new', ')' , ';'", tokenActual.getValor());
             }
         }
     }
@@ -484,7 +507,7 @@ public class AnalizadorSintactico {
         if(macheo("id_objeto")){
             listaDeclaracionVariablesPrima();
         }else{
-            System.out.println("listaDeclaracionVariables");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto'", tokenActual.getValor());
         }
     }
     
@@ -493,7 +516,7 @@ public class AnalizadorSintactico {
             listaDeclaracionVariables();
         }else{
             if(!verifico(";")){
-                System.out.println("listaDeclaracionVariablesPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ',' o ';'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ',' o ';'", tokenActual.getValor());
             }
         }
     }
@@ -506,13 +529,13 @@ public class AnalizadorSintactico {
             if(verifico("self")){
                 accesoSelfSimple();
             }else{
-                System.out.println("asignacion");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto' o 'self'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto' o 'self'", tokenActual.getValor());
             }
         }
         if(macheo("=")){
             expresion();
         }else{
-            System.out.println("asignacion");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '='", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '='", tokenActual.getValor());
         }
     }
     
@@ -520,7 +543,7 @@ public class AnalizadorSintactico {
         if(macheo("id_objeto")){
             enc();
         }else{
-            System.out.println("accesoVarSimple");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto'", tokenActual.getValor());
         }
     }
     
@@ -528,7 +551,7 @@ public class AnalizadorSintactico {
         if(macheo("self")){
             enc();
         }else{
-            System.out.println("accesoSelfSimple");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'self'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'self'", tokenActual.getValor());
         }
     }
     
@@ -538,14 +561,14 @@ public class AnalizadorSintactico {
             enc();
         }else{
             if(!verifico("=")){
-                System.out.println("enc");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '='", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '='", tokenActual.getValor());
             }
         }
     }
     
     private void encadenadoSimple() throws ExcepcionSintactica {
         if(!macheo(".") || !macheo("id_objeto")){
-            System.out.println("encadenadoSimple");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto' o '.'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto' o '.'", tokenActual.getValor());
         }
     }
     
@@ -553,10 +576,10 @@ public class AnalizadorSintactico {
         if(macheo("(")){
             expresion();
             if(!macheo(")")){
-                System.out.println("sentenciaSimple");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')'", tokenActual.getValor());
             }
         }else{
-            System.out.println("sentenciaSimple");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '('", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '('", tokenActual.getValor());
         }
     }
     
@@ -576,7 +599,7 @@ public class AnalizadorSintactico {
         }else{
             String[] args= {")" , ";"};
             if(!verifico(args)){
-                System.out.println("expOrPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '||' , ')' o ';'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '||' , ')' o ';'", tokenActual.getValor());
             }
         }
     }
@@ -593,7 +616,7 @@ public class AnalizadorSintactico {
         }else{
             String[] args= {"||" , ")" , ";"};
             if(!verifico(args)){
-                System.out.println("expAndPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&', '||' , ')' , ';' ", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&', '||' , ')' , ';' ", tokenActual.getValor());
             }
         }
     }
@@ -612,7 +635,7 @@ public class AnalizadorSintactico {
         }else{
            String[] args2 = {"&&" , "||" , ")" , ";"};
             if(!verifico(args2)){
-                System.out.println("expIgualPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&','==' , '!=', '||' , ')' , ';' ", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&','==' , '!=', '||' , ')' , ';' ", tokenActual.getValor());
             }
         }
     }
@@ -630,7 +653,7 @@ public class AnalizadorSintactico {
         }else{
             String[] args2 = {"==" , "!=" , "&&" , "||" , ")" , ";"};
             if(!verifico(args2)){
-                System.out.println("expCompuestaPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&','==' , '<' , '>' , '<=' , '>=', '!=', '||' , ')' , ';' ", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&','==' , '<' , '>' , '<=' , '>=', '!=', '||' , ')' , ';' ", tokenActual.getValor());
             }
         }
     }
@@ -649,8 +672,7 @@ public class AnalizadorSintactico {
         }else{
             String[] args2 = { "!" , "nil" , "true" , "false" , "lit_ent" , "lit_cad" , "lit_car" , "(" , "self" , "id_objeto" , "new" ,"<=" ,">=" ,">" ,"<" , "==" , "!=" , "&&" , "||" , ")" , ";"};
             if(!verifico(args2)){
-                System.out.println("expAddPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&', '+' , '-', '==' , '<' , '>' , '<=' , '>=', '!=', '||' , ')' , ';' ", tokenActual.getValor());
-
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&', '+' , '-', '==' , '<' , '>' , '<=' , '>=', '!=', '||' , ')' , ';' ", tokenActual.getValor());
             }
         }
     }
@@ -669,7 +691,7 @@ public class AnalizadorSintactico {
         }else{
             String[] args2 = {"+" , "-" , "!" , "nil" , "true" , "false" , "lit_ent" , "lit_cad" , "lit_car" , "(" , "self" , "id_objeto" , "new" ,"<=" ,">=" ,">" ,"<" , "==" , "!=" , "&&" , "||" , ")" , ";"};
             if(!verifico(args2)){
-                System.out.println("expMulPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&', '*' , '/' , '%', '+' , '-', '==' , '<' , '>' , '<=' , '>=', '!=', '||' , ')' , ';' ", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&', '*' , '/' , '%', '+' , '-', '==' , '<' , '>' , '<=' , '>=', '!=', '||' , ')' , ';' ", tokenActual.getValor());
             }
         }
     }
@@ -684,7 +706,7 @@ public class AnalizadorSintactico {
             if(verifico(args2)){
                 operando();
             }else{
-                System.out.println("expUn");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-' , '!', 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car' , '(' , 'self' , 'id_objeto', 'id_clase' , 'new'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-' , '!', 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car' , '(' , 'self' , 'id_objeto', 'id_clase' , 'new'", tokenActual.getValor());
             }  
         }
     }
@@ -692,33 +714,32 @@ public class AnalizadorSintactico {
     private void opIgual() throws ExcepcionSintactica {
         if(!macheo("==")){
             if(!macheo("!=")){
-                System.out.println("opIgual");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '!=' , '=='", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '!=' , '=='", tokenActual.getValor());
             }
         }
     }
     
     private void opCompuesto() throws ExcepcionSintactica {
         if(!macheo("<") && !macheo(">") && !macheo("<=") && !macheo(">=")){
-            System.out.println("opCompuesto");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '<' , '>' , '<=', '>='", tokenActual.getValor());
-
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '<' , '>' , '<=', '>='", tokenActual.getValor());
         }
     }
     
     private void opAdd() throws ExcepcionSintactica {
         if(!macheo("+") && !macheo("-") ){
-                System.out.println("opAdd");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-'", tokenActual.getValor());
         }
     }
     
     private void opUnario() throws ExcepcionSintactica {
         if(!macheo("+") && !macheo("-") && !macheo("!")){
-            System.out.println("opUnario");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-', '!'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-', '!'", tokenActual.getValor());
         }
     }
     
     private void opMul() throws ExcepcionSintactica {
         if(!macheo("*") && !macheo("/") && !macheo("%")){
-            System.out.println("opMul");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '*' , '/', '%'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '*' , '/', '%'", tokenActual.getValor());
         }
     }
     
@@ -732,14 +753,14 @@ public class AnalizadorSintactico {
                 primario();
                 encmul();
             }else{
-                System.out.println("operando");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car', '(' , 'self' , 'id_clase', 'id_objeto' , 'new'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car', '(' , 'self' , 'id_clase', 'id_objeto' , 'new'", tokenActual.getValor());
             }
         }
     }
     
     private void literal() throws ExcepcionSintactica {
         if(!macheo("nil") && !macheo("true") && !macheo("false") && !macheo("lit_ent") && !macheo("lit_cad") && !macheo("lit_car")){
-            System.out.println("literal");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car'", tokenActual.getValor());
         }
     }
     
@@ -759,7 +780,7 @@ public class AnalizadorSintactico {
                         if(macheo("id_objeto")){
                             primarioPrima();
                         }else{
-                            System.out.println("primario");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '(' , 'self' , 'id_clase', 'id_objeto' , 'new'", tokenActual.getValor());
+                            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '(' , 'self' , 'id_clase', 'id_objeto' , 'new'", tokenActual.getValor());
                         }
                     }
                 }
@@ -774,7 +795,7 @@ public class AnalizadorSintactico {
             if(verifico(args)){
                 encmul();
             }else{
-                System.out.println("primarioPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '.' o '(' ", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '.' o '(' ", tokenActual.getValor());
             }
         }
     }
@@ -786,10 +807,10 @@ public class AnalizadorSintactico {
             if(macheo(")")){
                 encmul();
             }else{
-                System.out.println("expresionParentizada");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')' ", tokenActual.getValor());            
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')' ", tokenActual.getValor());            
             }
         }else{
-            System.out.println("expresionParentizada");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '(' ", tokenActual.getValor());        
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '(' ", tokenActual.getValor());        
         }
     }
     
@@ -800,7 +821,8 @@ public class AnalizadorSintactico {
         }else{
             String[] args = {"*" , "/" , "%" , "+" , "-" , "!" , "nil" , "true" , "false" , "lit_ent" , "lit_cad" , "lit_car" , "(" , "self" , "id_objeto" , "new" , "<=" ,">=" ,">" ,"<" , "==" , "!=" , "&&" , "||" , ")" , ";"};
             if(!verifico(args)){
-                System.out.println("encmul");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '.', '*' , '/' , '%' , '+' , '-' , '!' , 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car' , '(' , 'self' , 'id_objeto' , 'new' , '==' , '!=' , '&&' , '||' , ')' , ';' ", tokenActual.getValor());            }
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '.', '*' , '/' , '%' , '+' , '-' , '!' , 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car' , '(' , 'self' , 'id_objeto' , 'new' , '==' , '!=' , '&&' , '||' , ')' , ';' ", tokenActual.getValor());            
+            }
         }
     }
     
@@ -808,7 +830,7 @@ public class AnalizadorSintactico {
         if(macheo("self")){
             encmul();
         }else{
-            System.out.println("accesoSelf");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'self' ", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'self' ", tokenActual.getValor());
         }
     }
     
@@ -817,7 +839,7 @@ public class AnalizadorSintactico {
             argumentosActuales();
             encmul();
         }else{
-            System.out.println("llamadaMetodo");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '(' ", tokenActual.getValor());  
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '(' ", tokenActual.getValor());  
         }
         
     }
@@ -827,7 +849,7 @@ public class AnalizadorSintactico {
             llamadaMetodo();
             encmul();
         }else{
-            System.out.println("llamadaMetodoEstatico");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_clase' o '.' ", tokenActual.getValor()); 
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_clase' o '.' ", tokenActual.getValor()); 
         }
         
     }
@@ -837,7 +859,7 @@ public class AnalizadorSintactico {
             argumentosActuales();
             encmul();
         }else{
-            System.out.println("llamadaConstructor");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'new' seguido por 'id_clase'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'new' seguido por 'id_clase'", tokenActual.getValor());
         }
         
     }
@@ -846,10 +868,10 @@ public class AnalizadorSintactico {
         if(macheo("(")){
             listExp();
             if(!macheo(")")){
-                System.out.println("argumentosActuales");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')'", tokenActual.getValor());
             }
         }else{
-            System.out.println("argumentosActuales");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '('", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '('", tokenActual.getValor());
         }
         
     }
@@ -860,7 +882,7 @@ public class AnalizadorSintactico {
             listaExpresiones();
         }else{
             if(!verifico(")")){
-                System.out.println("listExp");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token \"+\" , \"-\" , \"!\" , \"nil\" , \"true\" , \"false\" , \"lit_ent\" , \"lit_cad\" , \"lit_car\" , \"(\" , \"self\" , \"id_objeto\" , \"new\"", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token \"+\" , \"-\" , \"!\" , \"nil\" , \"true\" , \"false\" , \"lit_ent\" , \"lit_cad\" , \"lit_car\" , \"(\" , \"self\" , \"id_objeto\" , \"new\"", tokenActual.getValor());
             }
         }
     }
@@ -875,17 +897,16 @@ public class AnalizadorSintactico {
             listaExpresiones();
         }else{
             if(!verifico(")")){
-                System.out.println("listaExpresionesPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')' o ','", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')' o ','", tokenActual.getValor());
             }
         }
     }
     
-    /////////////////////////////////
     private void encadenado() throws ExcepcionSintactica {
         if(macheo(".") && macheo("id_objeto")){
             encadenadoPrima();
         }else{
-            System.out.println("encadenado");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '.' seguido por 'id_objeto'", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '.' seguido por 'id_objeto'", tokenActual.getValor());
         }        
     }
     
@@ -896,7 +917,7 @@ public class AnalizadorSintactico {
                 if(verifico(".")){ 
                     encmul();
                 }else{
-                    System.out.println("encadenadoPrima");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '(' o '.'", tokenActual.getValor());
+                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token '(' o '.'", tokenActual.getValor());
                 }
             }
     }
@@ -906,7 +927,7 @@ public class AnalizadorSintactico {
             argumentosActuales();
             encmul();
         }else{
-            System.out.println("llamadaMetodoEncadenado");            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '('", tokenActual.getValor());
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '('", tokenActual.getValor());
         } 
         
     }

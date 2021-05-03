@@ -1,5 +1,5 @@
-com/compiladores/compilador/etapa2/EjecutadorSintactico.class
 com/compiladores/compilador/etapa2/ExcepcionSintactica.class
+com/compiladores/compilador/etapa1/AnalizadorLexico$LectorArchivo.class
 com/compiladores/compilador/etapa1/AnalizadorLexico$ExcepcionLexica.class
 com/compiladores/compilador/etapa1/Token.class
 com/compiladores/compilador/etapa2/AnalizadorSintactico.class
