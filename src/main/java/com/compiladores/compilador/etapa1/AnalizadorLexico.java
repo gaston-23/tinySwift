@@ -27,21 +27,29 @@ public class AnalizadorLexico {
             
             int comentado = 0;
             boolean exito = true;
-            while((linea = lector.getLine())!=null) {
-                fila++;
-                if(comentado == 1 && !linea.contains("*/")) {
-                    continue;
-                }
-                if(linea.equals(" ") || linea.length()==0) {
-                    continue;
-                }
-                try {
+            try {
+                while((linea = lector.getLine())!=null) {
+                
+                    
+                    if(comentado == 2){
+                        throw new ExcepcionLexica(fila, fila, "se esperaba fin de literal cadena","fin de linea");
+                    }
+                    if(comentado == 1 && !linea.contains("*/")) {
+                        continue;
+                    }
+                    if(linea.equals(" ") || linea.length()==0) {
+                        continue;
+                    }
+                    fila++;
                     comentado = this.extractToken(linea.toCharArray(), fila, comentado);
-                }catch (ExcepcionLexica e) {
-                    System.err.println(e.mensaje);
-                    exito = false;
-                    break;
+                }    
+                if(comentado == 1 || comentado == 2){
+                    String comm = comentado == 1? " comentario" : " literal cadena";
+                    throw new ExcepcionLexica(fila, fila, "se esperaba fin de"+comm,"fin de archivo");
                 }
+            }catch (ExcepcionLexica e) {
+                System.err.println(e.mensaje);
+                exito = false;
             }
             if (exito) {
                 Token token = new Token(fila, 0, "EOF", "EOF");
@@ -528,23 +536,28 @@ public class AnalizadorLexico {
 						
 						//lit caracter
 						if((""+linea[i]+linea[i+1]).equals("'\\") && linea[i+3]=='\'') {
-                                                    if("btnfr'\"\\".contains(""+linea[i+2])){
+                                                    if(!"nt0".contains(""+linea[i+2])){
                                                         Token token = new Token(fila, i , "lit_car" , ""+ linea[i]+ linea[i+1]+ linea[i+2]+ linea[i+3]);
 							this.addToken(token);
 							i += 3;
                                                     }else{
-                                                        throw new ExcepcionLexica(fila, i, "declaracion de caracter invalida, se esperaba (\\b  \\t  \\n  \\f  \\r  \\\"  \\'  \\\\)", ""+linea[i+2]);
+                                                        throw new ExcepcionLexica(fila, i, "declaracion de caracter invalida ", ""+linea[i+2]);
                                                     }
 							
 							
 						}else {
 							if( linea[i+2] == '\'') {
+//                                                            btnfr0'\"\\
+                                                            if(!"\\\'".contains(""+linea[i+1])){
 								Token token = new Token(fila, i , "lit_car" , ""+ linea[i]+ linea[i+1]+ linea[i+2] );
 								this.addToken(token);
 								i += 2;
+                                                            }else{
+                                                                throw new ExcepcionLexica(fila, i, "se esperaba un simbolo distinto a ' o \\", ""+linea[i]);
+                                                            }
 							}else {
-								//throw error se esperaba un simbolo '
-								throw new ExcepcionLexica(fila, i, "se esperaba un simbolo '", ""+linea[i]);
+                                                            //throw error se esperaba un simbolo '
+                                                            throw new ExcepcionLexica(fila, i, "se esperaba un simbolo '", ""+linea[i]);
 							}
 							
 						}
@@ -576,8 +589,7 @@ public class AnalizadorLexico {
                                                     //throw error empieza con numero
                                                     throw new ExcepcionLexica(fila, i, "el identificador comienza con digito", curToken);
                                             }
-                                            if((curToken.equals("class")        ||
-                                                    curToken.equals("Main")	|| 
+                                            if((curToken.equals("class")        || 
                                                     curToken.equals("else") 	||
                                                     curToken.equals("false")	||
                                                     curToken.equals("if") 	||
@@ -613,7 +625,7 @@ public class AnalizadorLexico {
 			}
 		}
 		if(state.equals("lit_cad")) {
-                    throw new ExcepcionLexica(fila, linea.length, "se esperaba \"","fin de linea");
+                    return 2;
                 }
                 return 0;
 	}
