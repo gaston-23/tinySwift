@@ -97,37 +97,6 @@ public class AnalizadorSintactico {
         }
     }
 
-//    private void c() throws ExcepcionSintactica {
-//        if( verifico("id_clase") ){
-//            clase();
-//            programPrima();
-//        }else{
-//            if(verifico("Main")){
-//                claseMain();
-//            }else{
-//                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'class' o EOF", tokenActual.getValor());
-//            }
-//        }
-//    }
-    
-//    private void claseMain() throws ExcepcionSintactica {
-//        if( macheo("Main")){
-//            h();
-//            if(macheo("{")){
-//                m();
-//                bloque();
-//                m();
-//                if(!macheo("}")){
-//                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token '}'", tokenActual.getValor());
-//                }
-//            }else{
-//                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '{'", tokenActual.getValor());
-//            }
-//        }else{
-//            throw new ExcepcionSintactica(tokenActual,"se esperaba una declaracion de tipo 'class Main'", tokenActual.getValor());
-//        }
-//    }
-
     private void h() throws ExcepcionSintactica {
         if(verifico(":")){
             herencia();
@@ -138,12 +107,6 @@ public class AnalizadorSintactico {
         }
     }
     
-    
-    
-//    private boolean main() throws ExcepcionSintactica {
-//        return (macheo("static") && macheo("func") && macheo("void")  && macheo("main") && macheo("(") && macheo(")")) ;
-//    }
-
     private void clase() throws ExcepcionSintactica {
         if(macheo("class")){
             if(verifico("id_clase")&& verifico("Main")){
@@ -242,16 +205,6 @@ public class AnalizadorSintactico {
         }
     }
     
-//    private void v() throws ExcepcionSintactica {
-//        if(verifico("private")){
-//            visibilidad();
-//        }else{
-//            if(!verifico("var")){
-//                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'var'", tokenActual.getValor());
-//            }
-//        }
-//    }
-    
     private void restoMetodoVoid() throws ExcepcionSintactica {
         if(verifico("id_objeto") && verifico("main") && this.psfvm == 3){
             this.psfvm++;
@@ -299,28 +252,6 @@ public class AnalizadorSintactico {
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'static' o 'func'", tokenActual.getValor());
         }
     }
-
-//    private void f() throws ExcepcionSintactica {
-//        if(verifico("static")){
-//            formaMetodo();
-//        }else{
-//            if(!verifico("func")){
-//                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'static' o 'func'", tokenActual.getValor());
-//            }
-//        }
-//    }
-
-//    private void visibilidad() throws ExcepcionSintactica {
-//        if(!macheo("private")){
-//            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'private'", tokenActual.getValor());
-//        }
-//    }
-
-//    private void formaMetodo() throws ExcepcionSintactica {
-//        if(!macheo("static")){
-//            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'static'", tokenActual.getValor());
-//        }
-//    }
 
     private void constante() throws ExcepcionSintactica {
         if(macheo("let")){
@@ -404,16 +335,6 @@ public class AnalizadorSintactico {
         }
     }
 
-//    private void tipoMetodo() throws ExcepcionSintactica {
-//        String[] args = { "String","Bool","Int","Char","id_clase" };
-//        if(verifico(args)){
-//            tipo();
-//        }else{
-//            if(!macheo("void")){
-//                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char' o 'id_clase", tokenActual.getValor());
-//            }
-//        }
-//    }
 
     private void tipo() throws ExcepcionSintactica {
         String[] args = { "String","Bool","Int","Char"};
