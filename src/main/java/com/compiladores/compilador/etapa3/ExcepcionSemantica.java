@@ -3,17 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.compiladores.compilador.etapa2;
+package com.compiladores.compilador.etapa3;
 
 import com.compiladores.compilador.etapa1.Token;
 
 /**
-* Clase encargada de definir el error en el Analizador Sintactico
-* @author Gaston Cavallo
-* @author Mariel Volman
-*
-*/
-public class ExcepcionSintactica extends Exception {
+ *
+ * @author gx23
+ */
+public class ExcepcionSemantica  extends Exception {
     
     public String mensaje;
 
@@ -24,12 +22,12 @@ public class ExcepcionSintactica extends Exception {
      * @param expectativa Descripcion del error, por lo general, que se esperaba encontrar
      * @param valor Valor actual del token
      */
-     public ExcepcionSintactica (int fila, int col, String expectativa, String valor) {
-            this.mensaje = "ERROR: SINTACTICO | LINEA: "+fila+" | COLUMNA: "+ col +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
+     public ExcepcionSemantica (int fila, int col, String expectativa, String valor) {
+            this.mensaje = "ERROR: SEMANTICO | LINEA: "+fila+" | COLUMNA: "+ col +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
      }
 
-     public ExcepcionSintactica (Token token, String expectativa, String valor) {
-            this.mensaje = "ERROR: SINTACTICO | LINEA: "+token.getFila()+" | COLUMNA: "+ token.getColumna() +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
+     public ExcepcionSemantica (Token token, String expectativa, String valor) {
+            this.mensaje = "ERROR: SEMANTICO | LINEA: "+token.getFila()+" | COLUMNA: "+ token.getColumna() +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
      }
 
     @Override
@@ -38,4 +36,5 @@ public class ExcepcionSintactica extends Exception {
     }
         
         
+
 }

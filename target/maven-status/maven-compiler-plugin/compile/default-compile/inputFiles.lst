@@ -1,6 +1,13 @@
 /home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa1/Ejecutador.java
 /home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/main/Main.java
 /home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa2/ExcepcionSintactica.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa1/AnalizadorLexico.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa3/EntradaConstante.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa3/ExcepcionSemantica.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa3/EntradaVar.java
 /home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa1/Token.java
 /home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa2/AnalizadorSintactico.java
-/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa1/AnalizadorLexico.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa3/TablaDeSimbolos.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa3/EntradaClase.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa3/EntradaParametro.java
+/home/gx23/FAC/Compiladores/Proyecto/tinySwift/Compilador/src/main/java/com/compiladores/compilador/etapa3/EntradaMetodo.java
