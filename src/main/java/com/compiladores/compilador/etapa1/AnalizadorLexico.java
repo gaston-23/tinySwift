@@ -30,7 +30,7 @@ public class AnalizadorLexico {
             try {
                 while((linea = lector.getLine())!=null) {
                 
-                    
+                    fila++;
                     if(comentado == 2){
                         throw new ExcepcionLexica(fila, fila, "se esperaba fin de literal cadena","fin de linea");
                     }
@@ -40,7 +40,6 @@ public class AnalizadorLexico {
                     if(linea.equals(" ") || linea.length()==0) {
                         continue;
                     }
-                    fila++;
                     comentado = this.extractToken(linea.toCharArray(), fila, comentado);
                 }    
                 if(comentado == 1 || comentado == 2){

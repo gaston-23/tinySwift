@@ -5,7 +5,6 @@
  */
 package com.compiladores.compilador.etapa3;
 
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -20,22 +19,22 @@ public class TablaDeSimbolos {
     
     public TablaDeSimbolos (){
         this.clases = new Hashtable<>();
-        this.clases.put("Int", new EntradaClase("Int"));
-        this.clases.put("Bool", new EntradaClase("Bool"));        
-        this.clases.put("Char", new EntradaClase("Char"));
+        this.clases.put("Int", new EntradaClase("Int","Object",0,0));
+        this.clases.put("Bool", new EntradaClase("Bool","Object",0,0));        
+        this.clases.put("Char", new EntradaClase("Char","Object",0,0));
         this.clases.put("String", stringClass());
         this.clases.put("IO", ioClass());
-        this.clases.put("Object", new EntradaClase("Object"));
+        this.clases.put("Object", new EntradaClase("Object",null,0,0));
     }
     
     public EntradaClase stringClass(){
-        EntradaClase claseString = new EntradaClase("String");
+        EntradaClase claseString = new EntradaClase("String","Object",0,0);
         claseString.insertaMetodo("length", "Int");
         claseString.insertaMetodo("concat","String");
-        claseString.getMetodo("concat").insertaParametro("String","s");
+        claseString.getMetodo("concat").insertaParametro("String","s",0,0);
         claseString.insertaMetodo("substr", "String");
-        claseString.getMetodo("substr").insertaParametro("String","i");
-        claseString.getMetodo("substr").insertaParametro("String","l");
+        claseString.getMetodo("substr").insertaParametro("String","i",0,0);
+        claseString.getMetodo("substr").insertaParametro("String","l",0,0);
         return claseString;
     }
     
@@ -46,15 +45,15 @@ public class TablaDeSimbolos {
      * 
      */
     public EntradaClase ioClass(){
-        EntradaClase claseIO = new EntradaClase("IO");
+        EntradaClase claseIO = new EntradaClase("IO","Object",0,0);
         claseIO.insertaMetodo("out_string", "void");
-        claseIO.getMetodo("out_string").insertaParametro("String","s");
+        claseIO.getMetodo("out_string").insertaParametro("String","s",0,0);
         claseIO.insertaMetodo("out_int","void");
-        claseIO.getMetodo("out_int").insertaParametro("Int","i");
+        claseIO.getMetodo("out_int").insertaParametro("Int","i",0,0);
         claseIO.insertaMetodo("out_bool", "void");
-        claseIO.getMetodo("out_bool").insertaParametro("Bool","b");
+        claseIO.getMetodo("out_bool").insertaParametro("Bool","b",0,0);
         claseIO.insertaMetodo("out_char", "void");
-        claseIO.getMetodo("out_char").insertaParametro("Char","c");
+        claseIO.getMetodo("out_char").insertaParametro("Char","c",0,0);
         claseIO.insertaMetodo("in_string", "String");
         claseIO.insertaMetodo("in_int", "Int");
         claseIO.insertaMetodo("in_bool", "Bool");
@@ -62,12 +61,12 @@ public class TablaDeSimbolos {
         return claseIO;
     }
     
-    public void insertaClase(String nombre, String herencia){
-        this.clases.put(nombre, new EntradaClase(nombre,herencia));
-    }
-    
-    public void insertaClase(EntradaClase claseNueva){
-        this.clases.put(claseNueva.getNombre(), claseNueva);
+    public void insertaClase(EntradaClase claseNueva) throws Exception{
+        if(!this.clases.containsKey(claseNueva.getNombre())){
+            this.clases.put(claseNueva.getNombre(), claseNueva);
+        }else{
+            throw new ExcepcionSemantica(claseNueva.getFila(),claseNueva.getColumna(),"Clase declarada anteriormente",claseNueva.getHerencia(),true);
+        }
     }
 
     public void setClaseActual(EntradaClase claseActual) {
@@ -84,6 +83,10 @@ public class TablaDeSimbolos {
 
     public EntradaClase getClaseActual() {
         return claseActual;
+    }
+
+    public Hashtable<String, EntradaClase> getClases() {
+        return clases;
     }
 
     public String imprimeTS(){

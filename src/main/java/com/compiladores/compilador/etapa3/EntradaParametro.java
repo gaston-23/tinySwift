@@ -7,31 +7,36 @@ package com.compiladores.compilador.etapa3;
 
 /**
  *
- * @author gx23
+ * @author Gaston Cavallo
  */
 public class EntradaParametro{
     private String tipo;
     private String nombre;
     private int posicion;
-    private Object valor;
+    private int fila, columna;
     
-    public EntradaParametro(String tipo, String nombre,int posicion){
+    public EntradaParametro(String tipo, String nombre,int posicion, int fila, int col){
         this.tipo = tipo;
         this.posicion = posicion;
         this.nombre = nombre;
+        this.columna = col;
+        this.fila = fila;
     }
     
-    public EntradaParametro(String tipo, String nombre,Object valor,int posicion){
-        this.tipo = tipo;
-        this.posicion = posicion;
-        this.valor = valor;
-        this.nombre = nombre;
+    public String getTipo() {
+        return tipo;
     }
     
     public String imprimePar() {
         String json = "\n\"Tipo\": \""+this.tipo+"\",\n\"Posicion\": "+this.posicion+"\n";
-        
-        
         return json;
+    }
+
+    public int getColumna() {
+        return columna;
+    }
+
+    public int getFila() {
+        return fila;
     }
 }

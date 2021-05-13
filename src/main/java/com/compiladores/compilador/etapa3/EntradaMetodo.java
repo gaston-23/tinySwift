@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  *
- * @author gx23
+ * @author Gaston Cavallo
  */
 public class EntradaMetodo{
     
@@ -19,28 +19,34 @@ public class EntradaMetodo{
     private Hashtable<String,EntradaParametro> parametros;
     private Hashtable<String,EntradaVar>  variablesMet;    
     private Hashtable<String,EntradaConstante>  constanteMet;
-
+    private int fila, columna;
     private boolean isStatic;
     
-    public EntradaMetodo(String retorno){
+    public EntradaMetodo(String retorno,int fila, int col){
         this.tipoRetorno = retorno;
         this.parametros = new Hashtable<>();
         this.variablesMet = new Hashtable<>();
         this.constanteMet = new Hashtable<>();
+        this.columna = col;
+        this.fila = fila;
     }
-    public void insertaParametro(String tipo, String nombrePar, Object valor){
-        this.parametros.put(nombrePar, new EntradaParametro(tipo,nombrePar,valor,this.parametros.size()));
-    }
-    public void insertaParametro(String tipo, String nombrePar){
-        this.parametros.put(nombrePar, new EntradaParametro(tipo,nombrePar,this.parametros.size()));
-    }
-    
-    public void insertaVariable(String nombre, String tipo, boolean priv){
-        this.variablesMet.put(nombre, new EntradaVar(tipo, priv));
+    public void insertaParametro(String tipo, String nombrePar,int fila,int col){
+        this.parametros.put(nombrePar, new EntradaParametro(tipo,nombrePar,this.parametros.size(),fila,col));
     }
     
-    public void insertaConstante(String nombre, String tipo){
-        this.constanteMet.put(nombre, new EntradaConstante(tipo));
+    public void insertaVariable(String nombre, EntradaVar var) throws ExcepcionSemantica{
+        if(this.variablesMet.get(nombre)!=null){
+            throw new ExcepcionSemantica(var.getFila(),var.getColumna(),"Ya se ha declarado una variable con el mismo nombre",nombre,true);
+        }
+        this.variablesMet.put(nombre, var);
+    }
+    
+    
+    public void insertaConstante(String nombre, EntradaConstante k) throws ExcepcionSemantica{
+        if(this.constanteMet.get(nombre)!=null){
+            throw new ExcepcionSemantica(k.getFila(),k.getColumna(),"Ya se ha declarado una constante con el mismo nombre",nombre,true);
+        }
+        this.constanteMet.put(nombre, k);
     }
 
     public void setNombre(String nombre) {
@@ -57,6 +63,26 @@ public class EntradaMetodo{
 
     public void setIsStatic(boolean isStatic) {
         this.isStatic = isStatic;
+    }
+
+    public Hashtable<String, EntradaParametro> getParametros() {
+        return parametros;
+    }
+
+    public Hashtable<String, EntradaConstante> getConstanteMet() {
+        return constanteMet;
+    }
+
+    public Hashtable<String, EntradaVar> getVariablesMet() {
+        return variablesMet;
+    }
+    
+    public int getColumna() {
+        return columna;
+    }
+
+    public int getFila() {
+        return fila;
     }
     
     public String imprimeMet(){

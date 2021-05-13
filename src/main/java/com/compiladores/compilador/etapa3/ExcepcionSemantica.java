@@ -9,7 +9,7 @@ import com.compiladores.compilador.etapa1.Token;
 
 /**
  *
- * @author gx23
+ * @author Gaston Cavallo
  */
 public class ExcepcionSemantica  extends Exception {
     
@@ -22,13 +22,15 @@ public class ExcepcionSemantica  extends Exception {
      * @param expectativa Descripcion del error, por lo general, que se esperaba encontrar
      * @param valor Valor actual del token
      */
-     public ExcepcionSemantica (int fila, int col, String expectativa, String valor) {
-            this.mensaje = "ERROR: SEMANTICO | LINEA: "+fila+" | COLUMNA: "+ col +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
-     }
+    public ExcepcionSemantica (int fila, int col, String expectativa, String valor, boolean declaracion) {
+        String etapa = declaracion? "DECLARACIONES" : "";
+        this.mensaje = "ERROR: SEMANTICO "+etapa+" | LINEA: "+fila+" | COLUMNA: "+ col +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
+    }
 
-     public ExcepcionSemantica (Token token, String expectativa, String valor) {
-            this.mensaje = "ERROR: SEMANTICO | LINEA: "+token.getFila()+" | COLUMNA: "+ token.getColumna() +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
-     }
+    public ExcepcionSemantica (Token token, String expectativa, String valor, boolean declaracion) {
+        String etapa = declaracion? "DECLARACIONES" : "";
+        this.mensaje = "ERROR: SEMANTICO "+etapa+" | LINEA: "+token.getFila()+" | COLUMNA: "+ token.getColumna() +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
+    }
 
     @Override
     public String toString() {

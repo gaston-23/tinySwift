@@ -8,7 +8,9 @@ package com.compiladores.compilador.etapa2;
 import com.compiladores.compilador.etapa1.AnalizadorLexico;
 import com.compiladores.compilador.etapa1.Token;
 import com.compiladores.compilador.etapa3.EntradaClase;
+import com.compiladores.compilador.etapa3.EntradaConstante;
 import com.compiladores.compilador.etapa3.EntradaMetodo;
+import com.compiladores.compilador.etapa3.EntradaVar;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
 import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 
@@ -25,7 +27,7 @@ public class AnalizadorSintactico {
     private AnalizadorLexico al;
     private boolean mainClass,mainMethod;
     private int psfvm = 0;
-    public TablaDeSimbolos ts;
+    private TablaDeSimbolos ts;
     
     /**
     * Constructor AnalizadorSintactico
@@ -50,7 +52,6 @@ public class AnalizadorSintactico {
         }
         if(exito && this.mainMethod){
             System.out.println("CORRECTO: ANALISIS SINTACTICO");
-            System.out.println(this.ts.imprimeTS());
         }
     }
     
@@ -62,7 +63,6 @@ public class AnalizadorSintactico {
     * @throws ExcepcionSintactica 
     */
     private boolean macheo(String w){
-//        System.out.println("m:: "+tokenActual.getValor()+" | "+tokenActual.getpReservada());
         if(tokenActual.getValor().equals(w) || tokenActual.getpReservada().equals(w)){
             this.tokenActual = this.al.nextToken();
             return true;
@@ -115,8 +115,9 @@ public class AnalizadorSintactico {
                 this.mainClass = true;
             }
             String lexActual = tokenActual.getValor();
+            int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
             if(macheo("id_clase")){
-                this.ts.setClaseActual(new EntradaClase(lexActual));
+                this.ts.setClaseActual(new EntradaClase(lexActual,"Object",fil,col));
                 h(); 
                 if( macheo("{") ){
                     m();
@@ -197,12 +198,13 @@ public class AnalizadorSintactico {
     }
 
     private void constructor() throws Exception {
+        int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
         if(macheo("init")){
-            this.ts.setMetodoActual(new EntradaMetodo(this.ts.getClaseActual().getNombre()));
+            this.ts.setMetodoActual(new EntradaMetodo(this.ts.getClaseActual().getNombre(),fil,col));
             this.ts.getMetodoActual().setNombre("constructor");
             argumentosFormales();
             bloque();
-            this.ts.getClaseActual().insertaMetodo("contructor", this.ts.getMetodoActual());
+            this.ts.getClaseActual().insertaMetodo("constructor", this.ts.getMetodoActual());
             this.ts.setMetodoActual(null);
         }else{
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'init'", tokenActual.getValor());
@@ -246,7 +248,6 @@ public class AnalizadorSintactico {
         String auxId = tokenActual.getValor();
         if(macheo("id_objeto")){
             this.ts.getMetodoActual().setNombre(auxId);
-            this.ts.getClaseActual().insertaMetodo(auxId, this.ts.getMetodoActual());
             argumentosFormales();
             bloque();
         }else{
@@ -256,6 +257,7 @@ public class AnalizadorSintactico {
     
     private void restoMetodoEstatico() throws Exception {
         String auxTipo = this.tokenActual.getValor();
+        int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
         if(!macheo("void")){
             if(!macheo("String")){
                 if(!macheo("Bool")){
@@ -273,7 +275,7 @@ public class AnalizadorSintactico {
                 this.psfvm = 0;
             }
         }
-        this.ts.setMetodoActual(new EntradaMetodo(auxTipo));
+        this.ts.setMetodoActual(new EntradaMetodo(auxTipo,fil,col));
         restoMetodoVoid();
     }
     
@@ -309,12 +311,13 @@ public class AnalizadorSintactico {
             tipoPrimitivo();
             if(macheo(":")){
                 String auxNombre = this.tokenActual.getValor();
+                int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
                 if(macheo("id_objeto")){
                     if(macheo("=")){
                         if(!this.ts.getMetodoActual().equals(null)){
-                            this.ts.getMetodoActual().insertaConstante(auxNombre, auxTipo);
+                            this.ts.getMetodoActual().insertaConstante(auxNombre, new EntradaConstante(auxTipo,fil,col));
                         }else{
-                            this.ts.getClaseActual().insertaConstante(auxNombre, auxTipo);
+                            this.ts.getClaseActual().insertaConstante(auxNombre,  new EntradaConstante(auxTipo,fil,col));
                         }
                         expresion();
                         if(!macheo(";")){
@@ -337,9 +340,6 @@ public class AnalizadorSintactico {
 
     private void argumentosFormales() throws Exception {
         if(macheo("(")){
-            if(this.ts.getMetodoActual().getNombre().equals("constructor") && !verifico(")")){
-                throw new ExcepcionSemantica(tokenActual,"el metodo constructor no debe tener argumentos", tokenActual.getValor());
-            }
             if(verifico(")") && this.psfvm == 4  && this.mainClass){
                 this.mainMethod = true;
             }else{
@@ -391,10 +391,11 @@ public class AnalizadorSintactico {
         tipo();
         if(macheo(":")){
             String auxNombre = this.tokenActual.getValor();
+            int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
             if(!macheo("id_objeto")){
                 throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto'", tokenActual.getValor());
             }else{
-                this.ts.getMetodoActual().insertaParametro(auxTipo, auxNombre);
+                this.ts.getMetodoActual().insertaParametro(auxTipo, auxNombre,fil,col);
             }
         }else{   
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':'", tokenActual.getValor());
@@ -483,10 +484,14 @@ public class AnalizadorSintactico {
                             }
                         }else{
                             if(macheo("let")){
+                                String auxTipo = this.tokenActual.getValor();
                                 tipoPrimitivo();
                                 if(macheo(":")){
+                                    String auxNombre = this.tokenActual.getValor();
+                                    int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
                                     if(macheo("id_objeto")){
                                         if(macheo("=")){
+                                            this.ts.getMetodoActual().insertaConstante(auxNombre,  new EntradaConstante(auxTipo,fil,col));
                                             expresion();
                                             if(!macheo(";")){
                                                 throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
@@ -558,11 +563,12 @@ public class AnalizadorSintactico {
     
     private void listaDeclaracionVariables(String tipo, boolean priv) throws Exception {
         String nombre = this.tokenActual.getValor();
+        int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
         if(macheo("id_objeto")){
             if(this.ts.getMetodoActual() == null){
-                this.ts.getClaseActual().insertaVariable(nombre, tipo , priv);
+                this.ts.getClaseActual().insertaVariable(nombre, new EntradaVar(tipo,priv,fil,col));
             }else{
-                this.ts.getMetodoActual().insertaVariable(nombre, tipo , priv);
+                this.ts.getMetodoActual().insertaVariable(nombre, new EntradaVar(tipo,priv,fil,col));
             }
             listaDeclaracionVariablesPrima(tipo , priv);
         }else{
@@ -1000,5 +1006,9 @@ public class AnalizadorSintactico {
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token '('", tokenActual.getValor());
         } 
         
+    }
+
+    public TablaDeSimbolos getTs() {
+        return ts;
     }
 }
