@@ -338,8 +338,10 @@ public class AnalizadorLexico {
 							curToken = "";
 							state = "";
 						}
-						Token token = new Token(fila, i , "op_not", ""+linea[i]);
-						this.addToken(token);
+						if(curToken.equals("")) {
+							state = "op_not";
+							curToken = ""+linea[i];
+						}
 						continue;
 					}
 					//operador igual

@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.compiladores</groupId>
     <artifactId>Compilador</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>4.0</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>14</maven.compiler.source>
-        <maven.compiler.target>14</maven.compiler.target>
+        <maven.compiler.source>16</maven.compiler.source>
+        <maven.compiler.target>16</maven.compiler.target>
     </properties>
     <build>
         <plugins>
@@ -26,4 +26,6 @@
             </plugin>
         </plugins>
     </build>
+    <name>Compilador TS</name>
+    <description>compilador Tiny Swift</description>
 </project>

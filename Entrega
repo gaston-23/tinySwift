@@ -1,0 +1,214 @@
+{
+"Clases":[
+{"ErroresLexicos": {
+"Herencia": "Object",
+"Constructor":{"Retorno": "ErroresLexicos",
+"Parametros":[
+]
+},
+ "Metodos": [
+{"error134": {
+"Retorno": "void",
+"Parametros":[
+{"hola": {
+
+"Tipo": "String",
+"Posicion": 0
+}
+}]
+}
+}],
+"Variables": [{"i": {
+"Tipo": "Int",
+"isPrivate": false}
+}]
+
+}
+},{"IO": {
+"Herencia": "null",
+"Constructor":"null",
+ "Metodos": [
+{"out_bool": {
+"Retorno": "void",
+"Parametros":[
+{"b": {
+
+"Tipo": "Bool",
+"Posicion": 0
+}
+}]
+}
+},{"in_bool": {
+"Retorno": "Bool",
+"Parametros":[
+]
+}
+},{"out_char": {
+"Retorno": "void",
+"Parametros":[
+{"c": {
+
+"Tipo": "Char",
+"Posicion": 0
+}
+}]
+}
+},{"in_char": {
+"Retorno": "Char",
+"Parametros":[
+]
+}
+},{"in_string": {
+"Retorno": "String",
+"Parametros":[
+]
+}
+},{"out_int": {
+"Retorno": "void",
+"Parametros":[
+{"i": {
+
+"Tipo": "Int",
+"Posicion": 0
+}
+}]
+}
+},{"out_string": {
+"Retorno": "void",
+"Parametros":[
+{"s": {
+
+"Tipo": "String",
+"Posicion": 0
+}
+}]
+}
+},{"in_int": {
+"Retorno": "Int",
+"Parametros":[
+]
+}
+}]
+
+}
+},{"Fibonacci": {
+"Herencia": "Object",
+"Constructor":{"Retorno": "Fibonacci",
+"Parametros":[
+]
+},
+ "Metodos": [
+{"imprimo_numero": {
+"Retorno": "void",
+"Parametros":[
+{"num": {
+
+"Tipo": "Int",
+"Posicion": 0
+}
+}]
+}
+},{"imprimo_sucesion": {
+"Retorno": "void",
+"Parametros":[
+{"s": {
+
+"Tipo": "Int",
+"Posicion": 0
+}
+}]
+}
+},{"sucesion_fib": {
+"Retorno": "Int",
+"Parametros":[
+{"n": {
+
+"Tipo": "Int",
+"Posicion": 0
+}
+}]
+}
+}],
+"Variables": [{"suma": {
+"Tipo": "Int",
+"isPrivate": true}
+},{"j": {
+"Tipo": "Int",
+"isPrivate": true}
+},{"i": {
+"Tipo": "Int",
+"isPrivate": true}
+}]
+
+}
+},{"Char": {
+"Herencia": "null",
+"Constructor":"null"
+
+}
+},{"Int": {
+"Herencia": "null",
+"Constructor":"null"
+
+}
+},{"Bool": {
+"Herencia": "null",
+"Constructor":"null"
+
+}
+},{"Object": {
+"Herencia": "null",
+"Constructor":"null"
+
+}
+},{"Main": {
+"Herencia": "Object",
+"Constructor":"null",
+ "Metodos": [
+{"main": {
+"Retorno": "void",
+"Parametros":[
+]
+}
+}]
+
+}
+},{"String": {
+"Herencia": "null",
+"Constructor":"null",
+ "Metodos": [
+{"length": {
+"Retorno": "Int",
+"Parametros":[
+]
+}
+},{"substr": {
+"Retorno": "String",
+"Parametros":[
+{"l": {
+
+"Tipo": "String",
+"Posicion": 1
+}
+},{"i": {
+
+"Tipo": "String",
+"Posicion": 0
+}
+}]
+}
+},{"concat": {
+"Retorno": "String",
+"Parametros":[
+{"s": {
+
+"Tipo": "String",
+"Posicion": 0
+}
+}]
+}
+}]
+
+}
+}]
+}

@@ -63,7 +63,9 @@ public class AnalizadorSintactico {
     * @throws ExcepcionSintactica 
     */
     private boolean macheo(String w){
+        
         if(tokenActual.getValor().equals(w) || tokenActual.getpReservada().equals(w)){
+            System.out.println(this.tokenActual.getValor());
             this.tokenActual = this.al.nextToken();
             return true;
         }else return false;
@@ -100,6 +102,7 @@ public class AnalizadorSintactico {
     }
     
     private void programPrima() throws Exception {
+        System.out.println("programPrima :: "+this.tokenActual.getValor());
         if(verifico("class")){
            clase(); 
         }else{
@@ -110,6 +113,7 @@ public class AnalizadorSintactico {
     }
     
     private void clase() throws Exception {
+        System.out.println("clase :: "+this.tokenActual.getValor());
         if(macheo("class")){
             if(verifico("id_clase")&& verifico("Main")){
                 this.mainClass = true;
@@ -142,6 +146,7 @@ public class AnalizadorSintactico {
     }
 
     private void h() throws Exception {
+        System.out.println("h :: "+this.tokenActual.getValor());
         if(verifico(":")){
             herencia();
         }else{
@@ -154,6 +159,7 @@ public class AnalizadorSintactico {
     }
     
     private void herencia() throws Exception {
+        System.out.println("herencia :: "+this.tokenActual.getValor());
         if(macheo(":")){
             String lexActual = tokenActual.getValor();
             tipo();
@@ -165,6 +171,7 @@ public class AnalizadorSintactico {
     }
 
     private void m() throws Exception {
+        System.out.println("m :: "+this.tokenActual.getValor());
         if(!verifico("}")){
             String[] args = {"private",  "static" , "init" , "let", "var", "func"};
             if(verifico(args)){
@@ -178,6 +185,7 @@ public class AnalizadorSintactico {
     }
     
     private void miembro() throws Exception {
+        System.out.println("miembro :: "+this.tokenActual.getValor());
         if(verifico("private") || verifico("var")){
             atributo();
         }else{
@@ -198,20 +206,101 @@ public class AnalizadorSintactico {
     }
 
     private void constructor() throws Exception {
+        System.out.println("constructor :: "+this.tokenActual.getValor());
         int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
         if(macheo("init")){
             this.ts.setMetodoActual(new EntradaMetodo(this.ts.getClaseActual().getNombre(),fil,col));
             this.ts.getMetodoActual().setNombre("constructor");
             argumentosFormales();
-            bloque();
+            bloqueMetodo();
             this.ts.getClaseActual().insertaMetodo("constructor", this.ts.getMetodoActual());
             this.ts.setMetodoActual(null);
         }else{
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'init'", tokenActual.getValor());
         }
     }
+    
+    private void bloqueMetodo() throws Exception {
+        System.out.println("bloqueMetodo :: "+this.tokenActual.getValor());
+        if(macheo("{")){
+            declaConstLocales();
+            declaVarLocales();
+            s(); 
+            if(!macheo("}")){
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '{'", tokenActual.getValor());
+            }
+        }
+    }
+    
+    private void declaVarLocales() throws Exception {
+        System.out.println("declaVarLocales :: "+this.tokenActual.getValor());
+        if(verifico("var")){
+            declaVarLoc();
+            declaVarLocales();
+        }
+    }
+    
+    private void declaVarLoc() throws Exception {
+        System.out.println("declaVarLoc :: "+this.tokenActual.getValor());
+        if(!macheo("var")){
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'var'", tokenActual.getValor());
+        }
+        String lexTipo = this.tokenActual.getValor();
+        tipo();   
+        if(macheo(":")){
+            listaDeclaracionVariables(lexTipo , false);
+            if(!macheo(";")){
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
+            }
+        }else{
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':'", tokenActual.getValor());
+        }
+    }
+    
+    private void declaConstLocales() throws Exception {
+        System.out.println("declaConstLocales :: "+this.tokenActual.getValor());
+        if(verifico("let")){
+            declaConstLoc();
+            declaConstLocales();
+        }
+    }
 
+    private void declaConstLoc() throws Exception {
+        System.out.println("declaConstLoc :: "+this.tokenActual.getValor());
+        if(macheo("let")){
+            String auxTipo = this.tokenActual.getValor();
+            tipoPrimitivo();
+            if(macheo(":")){
+                String auxNombre = this.tokenActual.getValor();
+                int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
+                if(macheo("id_objeto")){
+                    if(macheo("=")){
+                        if(!this.ts.getMetodoActual().equals(null)){
+                            this.ts.getMetodoActual().insertaConstante(auxNombre, new EntradaConstante(auxTipo,fil,col));
+                        }else{
+                            this.ts.getClaseActual().insertaConstante(auxNombre,  new EntradaConstante(auxTipo,fil,col));
+                        }
+                        expresion();
+                        if(!macheo(";")){
+                            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
+                        }
+                    }else{
+                        throw new ExcepcionSintactica(tokenActual,"se esperaba un token '='", tokenActual.getValor());
+                    }
+                }else{
+                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto'", tokenActual.getValor());
+                }
+                
+            }else{
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':'", tokenActual.getValor());
+            }
+        }else{
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'let' ", tokenActual.getValor());
+        }
+    }
+    
     private void atributo() throws Exception {
+        System.out.println("atributo :: "+this.tokenActual.getValor());
         boolean auxVisib = false;
         if(!macheo("private")){
             if(!verifico("var")){
@@ -222,7 +311,9 @@ public class AnalizadorSintactico {
         }
         variable(auxVisib);
     }
+    
     private void variable(boolean auxVisib) throws Exception {
+        System.out.println("variable :: "+this.tokenActual.getValor());
         if(!macheo("var")){
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'var'", tokenActual.getValor());
         }
@@ -240,6 +331,7 @@ public class AnalizadorSintactico {
     }
     
     private void restoMetodoVoid() throws Exception {
+        System.out.println("restoMetodoVoid :: "+this.tokenActual.getValor());
         if(verifico("id_objeto") && verifico("main") && this.psfvm == 3  && this.mainClass){
             this.psfvm++;
         }else{
@@ -249,13 +341,14 @@ public class AnalizadorSintactico {
         if(macheo("id_objeto")){
             this.ts.getMetodoActual().setNombre(auxId);
             argumentosFormales();
-            bloque();
+            bloqueMetodo();
         }else{
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto'", tokenActual.getValor());
         }
     }
     
     private void restoMetodoEstatico() throws Exception {
+        System.out.println("restoMetodoEstatico :: "+this.tokenActual.getValor());
         String auxTipo = this.tokenActual.getValor();
         int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
         if(!macheo("void")){
@@ -280,6 +373,7 @@ public class AnalizadorSintactico {
     }
     
     private void metodo() throws Exception {
+        System.out.println("metodo :: "+this.tokenActual.getValor());
         boolean auxStatic = false;
         if(macheo("static")){
             auxStatic = true;
@@ -306,6 +400,7 @@ public class AnalizadorSintactico {
     }
 
     private void constante() throws Exception {
+        System.out.println("constante :: "+this.tokenActual.getValor());
         if(macheo("let")){
             String auxTipo = this.tokenActual.getValor();
             tipoPrimitivo();
@@ -339,6 +434,7 @@ public class AnalizadorSintactico {
     }
 
     private void argumentosFormales() throws Exception {
+        System.out.println("argFor :: "+this.tokenActual.getValor());
         if(macheo("(")){
             if(verifico(")") && this.psfvm == 4  && this.mainClass){
                 this.mainMethod = true;
@@ -356,6 +452,7 @@ public class AnalizadorSintactico {
     }
 
     private void l() throws Exception {
+        System.out.println("l :: "+this.tokenActual.getValor());
         String[] args = { "String" , "Bool" , "Int" , "Char", "id_clase" };
         if(verifico(args)){
             listaArgumentosFormales();
@@ -367,6 +464,7 @@ public class AnalizadorSintactico {
     }
 
     private void listaArgumentosFormales() throws Exception {
+        System.out.println("listaArgumentosFormales :: "+this.tokenActual.getValor());
         String[] args = { "String" , "Bool" , "Int" , "Char", "id_clase" };
         if(verifico(args)){
             argumentoFormal();
@@ -377,6 +475,7 @@ public class AnalizadorSintactico {
     }
 
     private void listaArgumentosFormalesPrima() throws Exception {
+        System.out.println("listaArgumentosFormalesPrima :: "+this.tokenActual.getValor());
         if(macheo(",")){
             listaArgumentosFormales();
         }else{
@@ -387,6 +486,7 @@ public class AnalizadorSintactico {
     }
 
     private void argumentoFormal() throws Exception {
+        System.out.println("argumentoFormal :: "+this.tokenActual.getValor());
         String auxTipo = this.tokenActual.getValor();
         tipo();
         if(macheo(":")){
@@ -404,6 +504,7 @@ public class AnalizadorSintactico {
 
 
     private void tipo() throws Exception {
+        System.out.println("tipo :: "+this.tokenActual.getValor());
         String[] args = { "String","Bool","Int","Char"};
         if(verifico(args)){
             tipoPrimitivo(); 
@@ -418,6 +519,7 @@ public class AnalizadorSintactico {
     }
 
     private void tipoPrimitivo() throws Exception {
+        System.out.println("tipoPrimitivo :: "+this.tokenActual.getValor());
         if(!macheo("String")){
             if(!macheo("Bool")){
                 if(!macheo("Int")){
@@ -430,12 +532,14 @@ public class AnalizadorSintactico {
     }
 
     private void tipoReferencia() throws Exception {
+        System.out.println("tipoReferencia :: "+this.tokenActual.getValor());
         if(!macheo("id_clase")){
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_clase'", tokenActual.getValor());
         }
     }
 
     private void bloque() throws Exception {
+        System.out.println("bloque :: "+this.tokenActual.getValor());
         if(macheo("{")){
             s(); 
             if(!macheo("}")){
@@ -445,6 +549,7 @@ public class AnalizadorSintactico {
     }
 
     private void s() throws Exception {
+        System.out.println("s :: "+this.tokenActual.getValor());
         String[] args = { ";" , "var" , "if", "let" , "while" , "return" , "id_objeto" , "self" , "(" , "{"};
         if(verifico(args)){
             sentencia();
@@ -457,6 +562,7 @@ public class AnalizadorSintactico {
     }
     
     private void sentencia() throws Exception {
+        System.out.println("sentencia :: "+this.tokenActual.getValor());
         if(!macheo(";")){
             String[] args = { "id_objeto" , "self" };
             if(verifico(args)){
@@ -471,65 +577,37 @@ public class AnalizadorSintactico {
                         throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
                     }
                 }else{
-                    if(verifico("var")){
-                        variable(false);
+                    if(macheo("if") && macheo("(")){ //TODO TEST
+                        expresion();
+                        if(macheo(")")){
+                            sentencia();
+                            sentenciaPrima();
+                        }else{
+                            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')'", tokenActual.getValor());
+                        }
                     }else{
-                        if(macheo("if") && macheo("(")){ //TODO TEST
-                            expresion();
-                            if(macheo(")")){
-                                sentencia();
-                                sentenciaPrima();
+                        if(macheo("while")){
+                            if(macheo("(")){
+                                expresion();
+                                if(macheo(")")){
+                                    sentencia();
+                                }else{
+                                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')'", tokenActual.getValor());
+                                } 
                             }else{
-                                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')'", tokenActual.getValor());
+                                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '('", tokenActual.getValor());
                             }
                         }else{
-                            if(macheo("let")){
-                                String auxTipo = this.tokenActual.getValor();
-                                tipoPrimitivo();
-                                if(macheo(":")){
-                                    String auxNombre = this.tokenActual.getValor();
-                                    int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
-                                    if(macheo("id_objeto")){
-                                        if(macheo("=")){
-                                            this.ts.getMetodoActual().insertaConstante(auxNombre,  new EntradaConstante(auxTipo,fil,col));
-                                            expresion();
-                                            if(!macheo(";")){
-                                                throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
-                                            }
-                                        }else{
-                                             throw new ExcepcionSintactica(tokenActual,"se esperaba un token '='", tokenActual.getValor());   
-                                        }
-                                    }else{
-                                        throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto'", tokenActual.getValor());
-                                    }
-                                }else{
-                                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token ':'", tokenActual.getValor());
+                            if(macheo("return")){ 
+                                x();
+                                if(!macheo(";")){
+                                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
                                 }
                             }else{
-                                if(macheo("while")){
-                                    if(macheo("(")){
-                                        expresion();
-                                        if(macheo(")")){
-                                            sentencia();
-                                        }else{
-                                            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ')'", tokenActual.getValor());
-                                        } 
-                                    }else{
-                                        throw new ExcepcionSintactica(tokenActual,"se esperaba un token '('", tokenActual.getValor());
-                                    }
+                                if(verifico("{")){
+                                    bloque();
                                 }else{
-                                    if(macheo("return")){ 
-                                        x();
-                                        if(!macheo(";")){
-                                            throw new ExcepcionSintactica(tokenActual,"se esperaba un token ';'", tokenActual.getValor());
-                                        }
-                                    }else{
-                                        if(verifico("{")){
-                                            bloque();
-                                        }else{
-                                            throw new ExcepcionSintactica(tokenActual,"se esperaba un token '{', 'return', 'while', '(', 'let', 'if', 'var', 'self' ", tokenActual.getValor());
-                                        }
-                                    }
+                                    throw new ExcepcionSintactica(tokenActual,"se esperaba un token '{', 'return', 'while', '(', 'let', 'if', 'var', 'self' ", tokenActual.getValor());
                                 }
                             }
                         }
@@ -540,16 +618,19 @@ public class AnalizadorSintactico {
     }
     
     private void sentenciaPrima() throws Exception {
+        System.out.println("sentenciaPrima :: "+this.tokenActual.getValor());
         if(macheo("else")){
             sentencia();
-        }else{
-            if(!verifico("}")){ 
-                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '}' o 'else'", tokenActual.getValor());
-            }
         }
+//        else{
+//            if(!verifico("}")){ 
+//                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '}' o 'else'", tokenActual.getValor());
+//            }
+//        }
     }
     
     private void x() throws Exception {
+        System.out.println("x :: "+this.tokenActual.getValor());
         String[] args = {"+" , "-" , "!" , "nil" , "true" , "false" , "lit_ent" , "lit_cad" , "lit_car" , "(" , "self" , "id_objeto" , "new"};
         if(verifico(args)){
             expresion();
@@ -562,6 +643,7 @@ public class AnalizadorSintactico {
     }
     
     private void listaDeclaracionVariables(String tipo, boolean priv) throws Exception {
+        System.out.println("listaDeclaracionVariables :: "+this.tokenActual.getValor());
         String nombre = this.tokenActual.getValor();
         int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
         if(macheo("id_objeto")){
@@ -577,6 +659,7 @@ public class AnalizadorSintactico {
     }
     
     private void listaDeclaracionVariablesPrima(String tipo, boolean priv) throws Exception {
+        System.out.println("listaDeclaracionVariablesPrima :: "+this.tokenActual.getValor());
         if(macheo(",")){
             listaDeclaracionVariables(tipo , priv);
         }else{
@@ -587,6 +670,7 @@ public class AnalizadorSintactico {
     }
     
     private void asignacion() throws Exception {
+        System.out.println("asignacion :: "+this.tokenActual.getValor());
         if(verifico("id_objeto")){ 
             accesoVarSimple();
         }else{ 
@@ -604,6 +688,7 @@ public class AnalizadorSintactico {
     }
     
     private void accesoVarSimple() throws Exception {
+        System.out.println("accesoVarSimple :: "+this.tokenActual.getValor());
         if(macheo("id_objeto")){
             enc();
         }else{
@@ -612,6 +697,7 @@ public class AnalizadorSintactico {
     }
     
     private void accesoSelfSimple() throws Exception {
+        System.out.println("accesoSelfSimple :: "+this.tokenActual.getValor());
         if(macheo("self")){
             enc();
         }else{
@@ -620,6 +706,7 @@ public class AnalizadorSintactico {
     }
     
     private void enc() throws Exception {
+        System.out.println("enc :: "+this.tokenActual.getValor());
         if(verifico(".")){ 
             encadenadoSimple();
             enc();
@@ -631,6 +718,7 @@ public class AnalizadorSintactico {
     }
     
     private void encadenadoSimple() throws Exception {
+        System.out.println("encadenadoSimple :: "+this.tokenActual.getValor());
         if(macheo(".")){
             if(!macheo("id_objeto")){
                 throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_objeto'", tokenActual.getValor());
@@ -641,6 +729,7 @@ public class AnalizadorSintactico {
     }
     
     private void sentenciaSimple() throws Exception {
+        System.out.println("sentSimp :: "+this.tokenActual.getValor());
         if(macheo("(")){
             expresion();
             if(!macheo(")")){
@@ -652,119 +741,103 @@ public class AnalizadorSintactico {
     }
     
     private void expresion() throws Exception {
+        System.out.println("expresion :: "+this.tokenActual.getValor());
         expOr();
     }
     
     private void expOr() throws Exception {
+        System.out.println("expOr :: "+this.tokenActual.getValor());
         expAnd();
         expOrPrima();
     }
     
     private void expOrPrima() throws Exception {
+        System.out.println("expOrPrima :: "+this.tokenActual.getValor());
         if(macheo("||")){
             expAnd();
             expOrPrima();
-        }else{
-            String[] args= {")" , ";"};
-            if(!verifico(args)){
-                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '||' , ')' o ';'", tokenActual.getValor());
-            }
         }
     }
     
     private void expAnd() throws Exception {
+        System.out.println("expAnd :: "+this.tokenActual.getValor());
         expIgual();
         expAndPrima();
     }
     
     private void expAndPrima() throws Exception {
+        System.out.println("expAndPrima :: "+this.tokenActual.getValor());
         if(macheo("&&")){
             expIgual();
             expAndPrima();
-        }else{
-            String[] args= {"||" , ")" , ";"};
-            if(!verifico(args)){
-                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&', '||' , ')' , ';' ", tokenActual.getValor());
-            }
         }
     }
     
     private void expIgual() throws Exception {
+        System.out.println("expIgual :: "+this.tokenActual.getValor());
         expCompuesta();
         expIgualPrima();
     }
     
     private void expIgualPrima() throws Exception {
+        System.out.println("expIgualPrima :: "+this.tokenActual.getValor());
         String[] args = {"==" , "!="};
         if(verifico(args)){
             opIgual();
             expCompuesta();
             expIgualPrima();
-        }else{
-           String[] args2 = {"&&" , "||" , ")" , ";"};
-            if(!verifico(args2)){
-                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&','==' , '!=', '||' , ')' , ';' ", tokenActual.getValor());
-            }
         }
     }
     
     private void expCompuesta() throws Exception {
+        System.out.println("expCompuesta :: "+this.tokenActual.getValor());
         expAdd();
         expCompuestaPrima();
     }
     
     private void expCompuestaPrima() throws Exception {
+        System.out.println("expCompuestaPrima :: "+this.tokenActual.getValor());
         String[] args = {"<" , ">" , "<=" , ">="};
         if(verifico(args)){
             opCompuesto();
             expAdd();
-        }else{
-            String[] args2 = {"==" , "!=" , "&&" , "||" , ")" , ";"};
-            if(!verifico(args2)){
-                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&','==' , '<' , '>' , '<=' , '>=', '!=', '||' , ')' , ';' ", tokenActual.getValor());
-            }
         }
     }
     
     private void expAdd() throws Exception {
+        System.out.println("expAdd :: "+this.tokenActual.getValor());
         expMul();
         expAddPrima();
     }
     
     private void expAddPrima() throws Exception {
+        System.out.println("expAddPrima :: "+this.tokenActual.getValor());
         String[] args = { "+" , "-"};
         if(verifico(args)){
             opAdd();
             expMul();
             expAddPrima();
-        }else{
-            String[] args2 = { "!" , "nil" , "true" , "false" , "lit_ent" , "lit_cad" , "lit_car" , "(" , "self" , "id_objeto" , "new" ,"<=" ,">=" ,">" ,"<" , "==" , "!=" , "&&" , "||" , ")" , ";"};
-            if(!verifico(args2)){
-                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&', '+' , '-', '==' , '<' , '>' , '<=' , '>=', '!=', '||' , ')' , ';' ", tokenActual.getValor());
-            }
         }
     }
     
     private void expMul() throws Exception {
+        System.out.println("expMul :: "+this.tokenActual.getValor());
         expUn();
         expMulPrima();
     }
     
     private void expMulPrima() throws Exception {
+        System.out.println("expMulPrima :: "+this.tokenActual.getValor());
         String[] args = {"*" , "/" , "%"};
         if(verifico(args)){
             opMul();
             expUn();
             expMulPrima();  
-        }else{
-            String[] args2 = {"+" , "-" , "!" , "nil" , "true" , "false" , "lit_ent" , "lit_cad" , "lit_car" , "(" , "self" , "id_objeto" , "new" ,"<=" ,">=" ,">" ,"<" , "==" , "!=" , "&&" , "||" , ")" , ";"};
-            if(!verifico(args2)){
-                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '&&', '*' , '/' , '%', '+' , '-', '==' , '<' , '>' , '<=' , '>=', '!=', '||' , ')' , ';' ", tokenActual.getValor());
-            }
         }
     }
     
     private void expUn() throws Exception {
+        System.out.println("expUn :: "+this.tokenActual.getValor());
         String[] args = {"+" , "-" , "!"};
         if(verifico(args)){ 
             opUnario();
@@ -774,12 +847,13 @@ public class AnalizadorSintactico {
             if(verifico(args2)){
                 operando();
             }else{
-                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-' , '!', 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car' , '(' , 'self' , 'id_objeto', 'id_clase' , 'new'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"mal finalizacion de expresion", tokenActual.getValor());
             }  
         }
     }
     
     private void opIgual() throws Exception {
+        System.out.println("opIgual :: "+this.tokenActual.getValor());
         if(!macheo("==")){
             if(!macheo("!=")){
                 throw new ExcepcionSintactica(tokenActual,"se esperaba un token '!=' , '=='", tokenActual.getValor());
@@ -788,30 +862,35 @@ public class AnalizadorSintactico {
     }
     
     private void opCompuesto() throws Exception {
+        System.out.println("opCompuesto :: "+this.tokenActual.getValor());
         if(!macheo("<") && !macheo(">") && !macheo("<=") && !macheo(">=")){
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token '<' , '>' , '<=', '>='", tokenActual.getValor());
         }
     }
     
     private void opAdd() throws Exception {
+        System.out.println("opAdd :: "+this.tokenActual.getValor());
         if(!macheo("+") && !macheo("-") ){
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-'", tokenActual.getValor());
         }
     }
     
     private void opUnario() throws Exception {
+        System.out.println("opUnario :: "+this.tokenActual.getValor());
         if(!macheo("+") && !macheo("-") && !macheo("!")){
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-', '!'", tokenActual.getValor());
         }
     }
     
     private void opMul() throws Exception {
+        System.out.println("opMul :: "+this.tokenActual.getValor());
         if(!macheo("*") && !macheo("/") && !macheo("%")){
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token '*' , '/', '%'", tokenActual.getValor());
         }
     }
     
     private void operando() throws Exception {
+        System.out.println("operando :: "+this.tokenActual.getValor());
         String[] args = {"nil" , "true" , "false" , "lit_ent" , "lit_cad" , "lit_car"};
         if(verifico(args)){ 
             literal();
@@ -819,20 +898,21 @@ public class AnalizadorSintactico {
             String[] args2 = {"(" , "self" , "id_objeto", "id_clase" , "new"};
             if(verifico(args2)){ 
                 primario();
-                encmul();
             }else{
-                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car', '(' , 'self' , 'id_clase', 'id_objeto' , 'new'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"mal finalizacion de operando", tokenActual.getValor());
             }
         }
     }
     
     private void literal() throws Exception {
+        System.out.println("literal :: "+this.tokenActual.getValor());
         if(!macheo("nil") && !macheo("true") && !macheo("false") && !macheo("lit_ent") && !macheo("lit_cad") && !macheo("lit_car")){
             throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car'", tokenActual.getValor());
         }
     }
     
     private void primario() throws Exception {
+        System.out.println("primario :: "+this.tokenActual.getValor()+ " tok "+this.tokenActual.getpReservada());
         if(verifico("(")){ 
             expresionParentizada();
         }else{
@@ -856,6 +936,7 @@ public class AnalizadorSintactico {
         }
     }
     private void primarioPrima() throws Exception {
+        System.out.println("primPrim :: "+this.tokenActual.getValor());
         if(verifico("(")){ 
             llamadaMetodo();
         }else{
@@ -870,6 +951,7 @@ public class AnalizadorSintactico {
         
     
     private void expresionParentizada() throws Exception {
+        System.out.println("expPar :: "+this.tokenActual.getValor());
         if(macheo("(")){
             expresion();
             if(macheo(")")){
@@ -883,10 +965,11 @@ public class AnalizadorSintactico {
     }
     
     private void encmul() throws Exception {
+        System.out.println("encMul :: "+this.tokenActual.getValor());
         if(verifico(".")){ 
             encadenado();
         }else{
-            String[] args = {"*" , "/" , "%" , "+" , "-" , "!" , "nil" , "true" , "false" , "lit_ent" , "lit_cad" , "lit_car" , "(" , "self" , "id_objeto" , "new" , "<=" ,">=" ,">" ,"<" , "==" , "!=" , "&&" , "||" , ")" , ";"};
+            String[] args = {"*", ",", "/" , "%" , "+" , "-" , "!" , "nil" , "true" , "false" , "lit_ent" , "lit_cad" , "lit_car" , "(" , "self" , "id_objeto" , "new" , "<=" ,">=" ,">" ,"<" , "==" , "!=" , "&&" , "||" , ")" , ";"};
             if(!verifico(args)){
                 throw new ExcepcionSintactica(tokenActual,"se esperaba un token '.', '*' , '/' , '%' , '+' , '-' , '!' , 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car' , '(' , 'self' , 'id_objeto' , 'new' , '==' , '!=' , '&&' , '||' , ')' , ';' ", tokenActual.getValor());            
             }
@@ -894,6 +977,7 @@ public class AnalizadorSintactico {
     }
     
     private void accesoSelf() throws Exception {
+        System.out.println("accesoSelf :: "+this.tokenActual.getValor());
         if(macheo("self")){
             encmul();
         }else{
@@ -902,11 +986,13 @@ public class AnalizadorSintactico {
     }
     
     private void llamadaMetodo() throws Exception {
+        System.out.println("llamadaMetodo :: "+this.tokenActual.getValor());
         argumentosActuales();
         encmul();        
     }
     
     private void llamadaMetodoEstatico() throws Exception {
+        System.out.println("llamadaMetodoEstatico :: "+this.tokenActual.getValor());
         if(macheo("id_clase")){
             if(macheo(".")){
                 if(macheo("id_objeto")){
@@ -925,10 +1011,10 @@ public class AnalizadorSintactico {
     }
     
     private void llamadaConstructor() throws Exception {
+        System.out.println("llamadaConstructor :: "+this.tokenActual.getValor());
         if(macheo("new")){
             if(macheo("id_clase")){
                 argumentosActuales();
-                encmul();
             }else{
                 throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'id_clase'", tokenActual.getValor());
             }
@@ -938,6 +1024,7 @@ public class AnalizadorSintactico {
     }
     
     private void argumentosActuales() throws Exception {
+        System.out.println("argAct :: "+this.tokenActual.getValor());
         if(macheo("(")){
             listExp();
             if(!macheo(")")){
@@ -949,22 +1036,25 @@ public class AnalizadorSintactico {
     }
     
     private void listExp() throws Exception {
+        System.out.println("listExp :: "+this.tokenActual.getValor());
         String[] args = {"+" , "-" , "!" , "nil" , "true" , "false" , "lit_ent" , "lit_cad" , "lit_car" , "(" , "self" , "id_objeto" , "new" };
         if(verifico(args)){
             listaExpresiones();
         }else{
             if(!verifico(")")){
-                throw new ExcepcionSintactica(tokenActual,"se esperaba un token '+' , '-' , '!' , 'nil' , 'true' , 'false' , 'lit_ent' , 'lit_cad' , 'lit_car' , '(' , 'self' , 'id_objeto' , 'new'", tokenActual.getValor());
+                throw new ExcepcionSintactica(tokenActual,"mal declaracion de expresion", tokenActual.getValor());
             }
         }
     }
     
     private void listaExpresiones() throws Exception {
+        System.out.println("listaExpresiones :: "+this.tokenActual.getValor());
         expresion();
         listaExpresionesPrima();
     }
     
     private void listaExpresionesPrima() throws Exception {
+        System.out.println("listaExpresionesPrima :: "+this.tokenActual.getValor());
         if(macheo(",")){
             listaExpresiones();
         }else{
@@ -975,6 +1065,7 @@ public class AnalizadorSintactico {
     }
     
     private void encadenado() throws Exception {
+        System.out.println("encad :: "+this.tokenActual.getValor());
         if(macheo(".")){
             if(macheo("id_objeto")){
                 encadenadoPrima();
@@ -987,6 +1078,7 @@ public class AnalizadorSintactico {
     }
     
     private void encadenadoPrima() throws Exception {
+        System.out.println("encadenadoPrima :: "+this.tokenActual.getValor());
         if(verifico("(")){ 
             llamadaMetodoEncadenado();
         }else{ 
@@ -999,6 +1091,7 @@ public class AnalizadorSintactico {
     }
     
     private void llamadaMetodoEncadenado() throws Exception {
+        System.out.println("llamadaMetodoEncadenado :: "+this.tokenActual.getValor());
         if(verifico("(")){
             argumentosActuales();
             encmul();

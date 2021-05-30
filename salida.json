@@ -1,0 +1,185 @@
+{
+"Clases":[
+{"B": {
+"Herencia": "Object",
+"Constructor":{"Retorno": "B",
+"Parametros":[
+]
+},
+"Variables": [{"a10": {
+"Tipo": "A",
+"isPrivate": false}
+},{"a9": {
+"Tipo": "A",
+"isPrivate": false}
+},{"a8": {
+"Tipo": "String",
+"isPrivate": false}
+},{"a7": {
+"Tipo": "String",
+"isPrivate": false}
+}]
+
+}
+},{"IO": {
+"Herencia": "Object",
+"Constructor":"null",
+ "Metodos": [
+{"out_bool": {
+"Retorno": "void",
+"Parametros":[
+{"b": {
+
+"Tipo": "Bool",
+"Posicion": 0
+}
+}]
+}
+},{"in_bool": {
+"Retorno": "Bool",
+"Parametros":[
+]
+}
+},{"out_char": {
+"Retorno": "void",
+"Parametros":[
+{"c": {
+
+"Tipo": "Char",
+"Posicion": 0
+}
+}]
+}
+},{"in_char": {
+"Retorno": "Char",
+"Parametros":[
+]
+}
+},{"in_string": {
+"Retorno": "String",
+"Parametros":[
+]
+}
+},{"out_int": {
+"Retorno": "void",
+"Parametros":[
+{"i": {
+
+"Tipo": "Int",
+"Posicion": 0
+}
+}]
+}
+},{"out_string": {
+"Retorno": "void",
+"Parametros":[
+{"s": {
+
+"Tipo": "String",
+"Posicion": 0
+}
+}]
+}
+},{"in_int": {
+"Retorno": "Int",
+"Parametros":[
+]
+}
+}]
+
+}
+},{"A": {
+"Herencia": "Object",
+"Constructor":{"Retorno": "A",
+"Parametros":[
+]
+},
+"Variables": [{"a2": {
+"Tipo": "Int",
+"isPrivate": false}
+},{"a1": {
+"Tipo": "Int",
+"isPrivate": false}
+},{"a5": {
+"Tipo": "B",
+"isPrivate": false}
+},{"a4": {
+"Tipo": "B",
+"isPrivate": false}
+},{"a3": {
+"Tipo": "Int",
+"isPrivate": false}
+}]
+
+}
+},{"Char": {
+"Herencia": "Object",
+"Constructor":"null"
+
+}
+},{"Int": {
+"Herencia": "Object",
+"Constructor":"null"
+
+}
+},{"Bool": {
+"Herencia": "Object",
+"Constructor":"null"
+
+}
+},{"Object": {
+"Herencia": "null",
+"Constructor":"null"
+
+}
+},{"Main": {
+"Herencia": "Object",
+"Constructor":"null",
+ "Metodos": [
+{"main": {
+"Retorno": "void",
+"Parametros":[
+]
+}
+}]
+
+}
+},{"String": {
+"Herencia": "Object",
+"Constructor":"null",
+ "Metodos": [
+{"length": {
+"Retorno": "Int",
+"Parametros":[
+]
+}
+},{"substr": {
+"Retorno": "String",
+"Parametros":[
+{"l": {
+
+"Tipo": "String",
+"Posicion": 1
+}
+},{"i": {
+
+"Tipo": "String",
+"Posicion": 0
+}
+}]
+}
+},{"concat": {
+"Retorno": "String",
+"Parametros":[
+{"s": {
+
+"Tipo": "String",
+"Posicion": 0
+}
+}]
+}
+}]
+
+}
+}]
+}

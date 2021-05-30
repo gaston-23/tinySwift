@@ -10,7 +10,7 @@ import com.compiladores.compilador.etapa2.*;
 import com.compiladores.compilador.etapa3.AnalizadorSemantico;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.nio.file.Path;
+import java.io.File;
 
 
 /**
@@ -26,12 +26,17 @@ public class Main {
         AnalizadorSemantico aD = new AnalizadorSemantico(aS);
         FileWriter destino = null;
         PrintWriter impresora = null;
-        String ruta = "";
-        if(System.getProperty("os.name").contains("indow")){
-            ruta = args[0].substring(0, args[0].lastIndexOf("\\"))+"\\salida.json";
-        }else{
-            ruta = args[0].substring(0, args[0].lastIndexOf("/"))+"/salida.json";
-        }
+        char barra = File.separatorChar;
+        String ruta = "", rutaTok = "";
+        
+        File rr = new File(args[0]);
+        ruta = rr.getParent() + barra + "./salida.json";      
+        System.out.println(ruta);
+        rutaTok = args[0].substring(0, args[0].lastIndexOf(barra))+barra+"tokens.txt";
+        
+        Ejecutador eAL = new Ejecutador();
+        String[] argu2 = {args[0],rutaTok} ;
+        eAL.main(argu2);
         try {
             destino = new FileWriter(ruta);
             impresora = new PrintWriter(destino);
