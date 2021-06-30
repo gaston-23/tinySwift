@@ -5,6 +5,7 @@
  */
 package com.compiladores.compilador.etapa3;
 
+import com.compiladores.compilador.etapa2.ExcepcionSintactica;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -16,8 +17,13 @@ public class TablaDeSimbolos {
     private Hashtable<String,EntradaClase> clases;
     private EntradaClase claseActual;
     private EntradaMetodo metodoActual;
+    private String nombre; 
+    private int lastLabel=0;
+    private int labelString = 0;
+    private Hashtable<String,String> labels;
+
     
-    public TablaDeSimbolos (){
+    public TablaDeSimbolos (String nombre){
         this.clases = new Hashtable<>();
         this.clases.put("Int", new EntradaClase("Int","Object",0,0));
         this.clases.put("Bool", new EntradaClase("Bool","Object",0,0));        
@@ -25,6 +31,8 @@ public class TablaDeSimbolos {
         this.clases.put("String", stringClass());
         this.clases.put("IO", ioClass());
         this.clases.put("Object", new EntradaClase("Object",null,0,0));
+        this.nombre = nombre;
+        this.labels = new Hashtable<>();
     }
     
     public EntradaClase stringClass(){
@@ -61,7 +69,7 @@ public class TablaDeSimbolos {
         return claseIO;
     }
     
-    public void insertaClase(EntradaClase claseNueva) throws Exception{
+    public void insertaClase(EntradaClase claseNueva) throws ExcepcionSemantica{
         if(!this.clases.containsKey(claseNueva.getNombre())){
             this.clases.put(claseNueva.getNombre(), claseNueva);
         }else{
@@ -77,6 +85,26 @@ public class TablaDeSimbolos {
         this.metodoActual = metodoActual;
     }
 
+    public void setClaseActual(String claseActual) {
+        this.claseActual = this.getClases().get(claseActual);
+    }
+
+    public void setMetodoActual(String metodoActual) {
+        if(metodoActual.equals("constructor")){
+            this.metodoActual = this.getClaseActual().getConstructor();
+        }else{
+            this.metodoActual = this.getClaseActual().getMetodo(metodoActual);
+        }
+    }
+    
+    public void limpiaMetodoActual(){
+        this.metodoActual = null;
+    }
+    
+    public void limpiaClaseActual(){
+        this.claseActual = null;
+    }
+
     public EntradaMetodo getMetodoActual() {
         return metodoActual;
     }
@@ -89,8 +117,26 @@ public class TablaDeSimbolos {
         return clases;
     }
 
+    public int getLastLabel() {
+        return lastLabel++;
+    }
+
+    public int getLastString() {
+        return labelString++;
+    }
+    
+    public void putLabel(String key, String data){
+        this.labels.put(key, data);
+    }
+
+    public Hashtable<String, String> getLabels() {
+        return labels;
+    }
+    
+    
+
     public String imprimeTS(){
-        String json = "{\n";
+        String json = "{\n \"nombre\":\""+this.nombre+"\",\n";
         json += "\"Clases\":[\n";
         for(Map.Entry<String, EntradaClase> entry : clases.entrySet()) {
             String key = entry.getKey();

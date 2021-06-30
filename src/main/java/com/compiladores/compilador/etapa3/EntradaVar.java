@@ -12,7 +12,7 @@ package com.compiladores.compilador.etapa3;
 public class EntradaVar{
     private String tipo;
     private boolean isPrivate = false;
-    private int fila, columna;
+    private int fila, columna,posicion;
     
     public EntradaVar(String tipo,int fila,int col){
         this.tipo = tipo;
@@ -38,8 +38,33 @@ public class EntradaVar{
     public int getFila() {
         return fila;
     }
+
+    public boolean isIsPrivate() {
+        return isPrivate;
+    }
+
+    public void setPosicion(int posicion) {
+        this.posicion = posicion;
+    }
+
+    public int getPosicion() {
+        return posicion;
+    }
+    
     
     public String imprimeVar(){
-        return "\"Tipo\": \""+this.tipo+"\",\n\"isPrivate\": "+ this.isPrivate;
+        return "\"Tipo\": \""+this.tipo+"\",\n\"isPrivate\": "+ this.isPrivate+",\n\"Posicion\": \""+this.posicion+"\"";
+    }
+    
+    public String generaCodigo(){
+        if (this.tipo.equals("String") || this.tipo.equals("Char")){
+            return ".asciiz \"\"";
+        }else{
+            if(this.tipo.equals("Int") || this.tipo.equals("Bool")) {
+                return ".word 0";
+            }else{
+                return ".space ";
+            }
+        }
     }
 }

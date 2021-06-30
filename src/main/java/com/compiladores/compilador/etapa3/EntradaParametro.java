@@ -39,4 +39,14 @@ public class EntradaParametro{
     public int getFila() {
         return fila;
     }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public int getPosicion() {
+        return posicion;
+    }
+    
+    
 }

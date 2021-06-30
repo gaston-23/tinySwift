@@ -20,7 +20,7 @@ public class EntradaClase{
     private Hashtable<String,EntradaConstante> constantes;
     private EntradaMetodo constructor=null;
     private boolean consolidado=false;
-    private int fila, columna;
+    private int fila, columna, posAtri=0;
     
     public EntradaClase(String tipo,String herencia,int fila,int col){
         this.nombre = tipo;
@@ -57,6 +57,8 @@ public class EntradaClase{
             throw new ExcepcionSemantica(var.getFila(),var.getColumna(),"Ya se ha declarado una variable con el mismo nombre",nombre,true);
         }
         this.variablesInst.put(nombre, var);
+        this.variablesInst.get(nombre).setPosicion(this.posAtri);
+        this.posAtri++;
     }
     
     public void insertaConstante(String nombre, EntradaConstante k) throws ExcepcionSemantica{
@@ -64,6 +66,8 @@ public class EntradaClase{
             throw new ExcepcionSemantica(k.getFila(),k.getColumna(),"Ya se ha declarado una constante con el mismo nombre",nombre,true);
         }
         this.constantes.put(nombre, k);
+        this.constantes.get(nombre).setPosicion(this.posAtri);
+        this.posAtri++;
     }
     
     public EntradaMetodo getMetodo(String nombre){
@@ -78,6 +82,18 @@ public class EntradaClase{
         return herencia;
     }
 
+    public boolean hereda(String hijo, TablaDeSimbolos ts){
+        if(herencia != null && !herencia.equals("Object")){
+            if(herencia.equals(hijo)){
+                return true;
+            }else{
+                return ts.getClases().get(herencia).hereda(hijo,ts);
+            }
+        }else{
+            return false;
+        }
+    }
+    
     public void setHerencia(String herencia) {
         this.herencia = herencia;
     }
@@ -105,7 +121,7 @@ public class EntradaClase{
     public Hashtable<String, EntradaVar> getVariablesInst() {
         return variablesInst;
     }
-
+    
     public int getColumna() {
         return columna;
     }

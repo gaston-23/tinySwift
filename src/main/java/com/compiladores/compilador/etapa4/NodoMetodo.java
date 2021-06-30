@@ -5,22 +5,33 @@
  */
 package com.compiladores.compilador.etapa4;
 
-import java.util.HashMap;
+import com.compiladores.compilador.etapa3.EntradaMetodo;
+import com.compiladores.compilador.etapa3.ExcepcionSemantica;
+import com.compiladores.compilador.etapa3.TablaDeSimbolos;
+import java.util.LinkedList;
 
 /**
  *
- * @author gx23
+ * @author Gaston Cavallo
  */
-public class NodoMetodo {
-    private HashMap<String, NodoSentencia> bloque;
+public class NodoMetodo extends NodoAST {
+    private LinkedList<NodoSentencia> bloque;
+    private LinkedList<NodoExpresion> args;
     private String nombre;
+    private String tipo;
+    private String padre;
+    private NodoExpresion retorno;
     
     
-    public NodoMetodo(String nombre){
-        this.nombre = nombre;
+    public NodoMetodo(int filaTok,int colTok,String tipo,String padre){
+        super(filaTok,colTok);
+        this.tipo = tipo;
+        this.args = new LinkedList<>();
+        this.bloque = new LinkedList<>();
+        this.padre = padre;
     }
 
-    public HashMap<String, NodoSentencia> getBloque() {
+    public LinkedList<NodoSentencia> getBloque() {
         return bloque;
     }
 
@@ -28,8 +39,81 @@ public class NodoMetodo {
         return nombre;
     }
 
-    public void putBloque(String nombre, NodoSentencia sentencia) {
-        this.bloque.put(nombre, sentencia);
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setRetorno(NodoExpresion retorno) {
+        this.retorno = retorno;
+    }
+
+    public void putBloque(NodoSentencia sentencia) {
+        this.bloque.add(sentencia);
+    }
+
+    public LinkedList<NodoExpresion> getArgs() {
+        return args;
     }
     
+    public void putArg(NodoExpresion nE){
+        this.args.add(nE);
+    }
+    
+    @Override
+    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica {
+        EntradaMetodo eC = ts.getClases().get(this.padre).getMetodo(this.nombre);
+            
+        if(this.retorno!=null && !this.retorno.getTipo(ts).equals(eC.getTipoRetorno())){
+            throw new ExcepcionSemantica(this.getFila(),this.getCol(),"El tipo de retorno no coincide con el declarado",this.nombre,false);
+        }
+        if(!this.bloque.isEmpty()){
+            for (int i = 0; i < this.bloque.size(); i++) {
+                this.bloque.get(i).verifica(ts);
+            }
+        }
+        return true;
+    }
+
+    public String getPadre() {
+        return padre;
+    }
+
+    public NodoExpresion getRetorno() {
+        return retorno;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+    
+    
+    
+    public String imprimeMet(){
+        String json = "";
+        if(this.retorno!=null){
+            json += "\"Retorno\": {"+this.retorno.imprimeSentencia()+"},\n";
+        }
+        json += "\"Bloque\":[\n";
+        if(!this.bloque.isEmpty()){
+            for (int i = 0; i < this.bloque.size(); i++) {
+                
+                json +="{"+ this.bloque.get(i).imprimeSentencia()+"},";
+            }
+            json = json.substring(0,json.length()-1);
+        }
+        json +="]\n";
+        return json;
+    }
+    
+    public String getCodigo(TablaDeSimbolos ts){
+        String asm = "";
+        if(!this.bloque.isEmpty()){
+            for (int i = 0; i < this.bloque.size(); i++) {
+                
+                asm += this.bloque.get(i).getCodigo(ts);
+            }
+        }
+        
+        return asm;
+    }
 }

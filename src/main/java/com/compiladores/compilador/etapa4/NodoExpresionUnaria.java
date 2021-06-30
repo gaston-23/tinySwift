@@ -7,10 +7,11 @@ package com.compiladores.compilador.etapa4;
 
 import com.compiladores.compilador.etapa1.Token;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
+import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 
 /**
  *
- * @author gx23
+ * @author Gaston Cavallo
  */
 public class NodoExpresionUnaria extends NodoExpresion{
     
@@ -18,49 +19,77 @@ public class NodoExpresionUnaria extends NodoExpresion{
     private String oper;
 
     
-    public NodoExpresionUnaria(Token tok){
-        super(tok);
+    public NodoExpresionUnaria(int filaTok,int colTok){
+        super(filaTok,colTok);
     } 
     
-    public NodoExpresionUnaria(Token tok, String op, NodoExpresion der){
-        super(tok);
+    public NodoExpresionUnaria(int filaTok,int colTok, String op, NodoExpresion der){
+        super(filaTok,colTok);
         this.der = der;
     }
 
     @Override
-    public boolean verifica() throws ExcepcionSemantica {
-        return isValid(this.der.getTipo(),this.oper);
+    public boolean checkIsBoolean(TablaDeSimbolos ts) throws ExcepcionSemantica  {
+        return (this.oper.equals("!") && der.getTipo(ts).equals("Bool"));
     }
     
-    private boolean isValid(String der,String op) throws ExcepcionSemantica {
-//        if(op.equals("||") || op.equals("&&")){
-//            if(der.equals(izq) && der.equals("Bool")){
-//                return true;
-//            }else{
-//                throw new ExcepcionSemantica(this.getToken(),"La expresion contiene tipos incompatibles",this.getToken().getValor(),false);
-//            }
-//        }else{
-//            if(op.equals("*") && op.equals("/") && op.equals("%") && op.equals("-") && op.equals("<") && op.equals(">") && op.equals("<=") && op.equals(">=") && op.equals("==") ){
-//                if(der.equals(izq) && der.equals("Int")){
-//                    return true;
-//                }else{
-//                    throw new ExcepcionSemantica(this.getToken(),"La expresion contiene tipos incompatibles",this.getToken().getValor(),false);
-//
-//                }
-//            }else{
-//                if(op.equals("+")){
-//                    if(der.equals(izq) && (der.equals("Int") || der.equals("String") || der.equals("Char"))){
-//                        return true;
-//                    }else{
-//                        throw new ExcepcionSemantica(this.getToken(),"La expresion contiene tipos incompatibles",this.getToken().getValor(),false);
-//                    } 
-//                }
-//            }
-//        }
-        // TODO metodo isValid
-        //TODO verificar herencias y compatibilidades
-        System.out.println("tipo no manejado:: "+op);
+    
+
+    @Override
+    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica {
+        String derT = der.getTipo(ts);
+        if(this.oper.equals("!") ){
+            
+            if(derT.equals("Bool")){
+                return true;
+            }else{
+                throw new ExcepcionSemantica(super.getFila(),super.getCol(),"La expresion contiene tipos incompatibles","operador: "+this.oper+" y tipo: "+derT,false);
+            }
+        }else{
+            if(oper.equals("-") && oper.equals("+") ){
+                if(derT.equals("Int")){
+                    return true;
+                }else{
+                    throw new ExcepcionSemantica(super.getFila(),super.getCol(),"La expresion contiene tipos incompatibles","operador: "+this.oper+" y tipo: "+derT,false);
+
+                }
+            }
+        }
         return false;
+    }
+
+    public void setDer(NodoExpresion der) {
+        this.der = der;
+    }
+
+    public void setOper(String oper) {
+        this.oper = oper;
+    }
+
+    @Override
+    public String getTipo(TablaDeSimbolos ts) throws ExcepcionSemantica {
+        return this.der.getTipo(ts);
+    }
+    
+    @Override
+    public String imprimeSentencia() {
+        return "\"nodo\": \"NodoExpresionUnaria\",\n"
+                + "\"operador\":\""+this.oper+"\",\n"
+                + "\"ladoDer\":{"+this.der.imprimeSentencia()+"\n}";
+    }
+
+    @Override
+    public String getCodigo(TablaDeSimbolos ts) {
+        if(this.oper.equals("!") ){
+            return der.getCodigo(ts)+"\tsubu $t0, $0, $t0\n";
+            
+        }else{
+            if(oper.equals("-")){
+                return der.getCodigo(ts)+"\tsubu $t0, $0, $t0\n";
+            }else{
+                return der.getCodigo(ts)+"\n";
+            }
+        }
     }
     
     

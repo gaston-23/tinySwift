@@ -6,6 +6,7 @@
 package com.compiladores.compilador.etapa3;
 
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -16,22 +17,23 @@ public class EntradaMetodo{
     
     private String tipoRetorno;
     private String nombre;
-    private Hashtable<String,EntradaParametro> parametros;
+    private LinkedList<EntradaParametro> parametros;
     private Hashtable<String,EntradaVar>  variablesMet;    
     private Hashtable<String,EntradaConstante>  constanteMet;
     private int fila, columna;
     private boolean isStatic;
+    private int posAtri=0;
     
     public EntradaMetodo(String retorno,int fila, int col){
         this.tipoRetorno = retorno;
-        this.parametros = new Hashtable<>();
+        this.parametros = new LinkedList<>();
         this.variablesMet = new Hashtable<>();
         this.constanteMet = new Hashtable<>();
         this.columna = col;
         this.fila = fila;
     }
     public void insertaParametro(String tipo, String nombrePar,int fila,int col){
-        this.parametros.put(nombrePar, new EntradaParametro(tipo,nombrePar,this.parametros.size(),fila,col));
+        this.parametros.add(new EntradaParametro(tipo,nombrePar,this.parametros.size(),fila,col));
     }
     
     public void insertaVariable(String nombre, EntradaVar var) throws ExcepcionSemantica{
@@ -39,6 +41,8 @@ public class EntradaMetodo{
             throw new ExcepcionSemantica(var.getFila(),var.getColumna(),"Ya se ha declarado una variable con el mismo nombre",nombre,true);
         }
         this.variablesMet.put(nombre, var);
+        this.variablesMet.get(nombre).setPosicion(this.posAtri);
+        this.posAtri++;
     }
     
     
@@ -47,6 +51,8 @@ public class EntradaMetodo{
             throw new ExcepcionSemantica(k.getFila(),k.getColumna(),"Ya se ha declarado una constante con el mismo nombre",nombre,true);
         }
         this.constanteMet.put(nombre, k);
+        this.constanteMet.get(nombre).setPosicion(this.posAtri);
+        this.posAtri++;
     }
 
     public void setNombre(String nombre) {
@@ -65,7 +71,7 @@ public class EntradaMetodo{
         this.isStatic = isStatic;
     }
 
-    public Hashtable<String, EntradaParametro> getParametros() {
+    public LinkedList<EntradaParametro> getParametros() {
         return parametros;
     }
 
@@ -76,6 +82,38 @@ public class EntradaMetodo{
     public Hashtable<String, EntradaVar> getVariablesMet() {
         return variablesMet;
     }
+    public int getTamañoParam(){
+        int tam = 0;
+        for (int i = 0; i < parametros.size(); i++) {
+            EntradaParametro par = parametros.get(i);
+            if(par.getTipo().equals("String")){
+                tam += 32;
+            }else{
+                tam += 4;
+            }
+        }
+        return tam;
+    }
+    public int getTamañoAtribs(){
+        int tam = 0;
+        for(Map.Entry<String, EntradaVar> var : variablesMet.entrySet()){
+            EntradaVar eVar = var.getValue();
+            if(eVar.getTipo().equals("String")){
+                tam += 32;
+            }else{
+                tam += 4;
+            }
+        }
+        for(Map.Entry<String, EntradaConstante> cte : constanteMet.entrySet()){
+            EntradaConstante eCte = cte.getValue();
+            if(eCte.getTipo().equals("String")){
+                tam += 32;
+            }else{
+                tam += 4;
+            }
+        }
+        return tam;
+    }
     
     public int getColumna() {
         return columna;
@@ -84,18 +122,57 @@ public class EntradaMetodo{
     public int getFila() {
         return fila;
     }
+    public boolean existPar(String p){
+        for (int i = 0; i < parametros.size(); i++) {
+            EntradaParametro par = parametros.get(i);
+            if(par.getNombre().equals(p)){
+                return true;
+            }
+        }
+        return false;
+    }
+    public EntradaParametro getParByName(String p){
+        for (int i = 0; i < parametros.size(); i++) {
+            EntradaParametro par = parametros.get(i);
+            if(par.getNombre().equals(p)){
+                return par;
+            }
+        }
+        return null;
+    }
     
     public String imprimeMet(){
         String json = "\"Retorno\": \""+this.tipoRetorno+"\",\n\"Parametros\":[\n";
         if(!this.parametros.isEmpty()){
-            for(Map.Entry<String, EntradaParametro> entry : parametros.entrySet()) {
-                String key = entry.getKey();
-                EntradaParametro value = entry.getValue();
-                json +="{\""+ key+ "\": {\n"+ value.imprimePar()+"}\n},";
+            for (int i = 0; i < parametros.size(); i++) {
+                EntradaParametro par = parametros.get(i);
+                json +="{\""+ par.getNombre()+ "\": {\n"+ par.imprimePar()+"}\n},";
             }
             json = json.substring(0,json.length()-1);
         }
-        json +="]\n";
+        json +="]";
+        if(!constanteMet.isEmpty()){
+            json +=",\n\"Constantes\": [";
+            for(Map.Entry<String, EntradaConstante> entry : constanteMet.entrySet()) {
+                String key = entry.getKey();
+                EntradaConstante value = entry.getValue();
+                json += "{\""+ key + "\": {\n"+value.imprimeConst()+"}\n},";
+            }
+            json = json.substring(0,json.length()-1);
+            json += "]";
+        }
+        if(!variablesMet.isEmpty()){
+            json +=",\n\"Variables\": [";
+            for(Map.Entry<String, EntradaVar> entry : variablesMet.entrySet()) {
+                String key = entry.getKey();
+                EntradaVar value = entry.getValue();
+                json += "{\""+ key + "\": {\n"+value.imprimeVar()+"}\n},";
+            }
+            json = json.substring(0,json.length()-1);
+            json += "]";
+        }
+        
+        json +="\n";
         return json;
     }
 

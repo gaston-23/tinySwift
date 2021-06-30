@@ -8,9 +8,9 @@ package com.compiladores.compilador.main;
 import com.compiladores.compilador.etapa1.*;
 import com.compiladores.compilador.etapa2.*;
 import com.compiladores.compilador.etapa3.AnalizadorSemantico;
+import com.compiladores.compilador.etapa5.GeneradorCodigo;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.io.File;
 
 
 /**
@@ -20,40 +20,47 @@ import java.io.File;
 public class Main {
     
     public static void main(String[] args) {
-        
-        AnalizadorLexico aL = new AnalizadorLexico(args[0]);
-        AnalizadorSintactico aS = new AnalizadorSintactico(aL);
-        AnalizadorSemantico aD = new AnalizadorSemantico(aS);
-        FileWriter destino = null;
-        PrintWriter impresora = null;
-        char barra = File.separatorChar;
-        String ruta = "", rutaTok = "";
-        
-        File rr = new File(args[0]);
-        ruta = rr.getParent() + barra + "./salida.json";      
-        System.out.println(ruta);
-        rutaTok = args[0].substring(0, args[0].lastIndexOf(barra))+barra+"tokens.txt";
-        
-        Ejecutador eAL = new Ejecutador();
-        String[] argu2 = {args[0],rutaTok} ;
-        eAL.main(argu2);
-        try {
-            destino = new FileWriter(ruta);
-            impresora = new PrintWriter(destino);
+        String ruta = args[0].split(".swift")[0];
+        AnalizadorLexico aL = null;
+        AnalizadorSintactico aS = null;
+        AnalizadorSemantico aD = null;
+        GeneradorCodigo cG = null;
+        try{
+            aL = new AnalizadorLexico(args[0]);
+            aS = new AnalizadorSintactico(aL,ruta);
+            aD = new AnalizadorSemantico(aS);
+            cG = new GeneradorCodigo(aS.getTs(),aS.getAst());
+            FileWriter destinoTs = null,destinoAst = null, destinoGc = null;
+            PrintWriter impresoraTs = null,impresoraAst = null, impresoraGc = null;
+
+    //        Ejecutador eAL = new Ejecutador();
+    //        String[] argu2 = {args[0],args[0].split(".swift")[0]+".txt"} ;
+    //        eAL.main(argu2);
+            
+            destinoTs = new FileWriter(ruta+".ts.json");
+            destinoAst = new FileWriter(ruta+".ast.json");
+            destinoGc = new FileWriter(ruta+".asm");
+            impresoraTs = new PrintWriter(destinoTs);
+            impresoraAst = new PrintWriter(destinoAst);
+            impresoraGc = new PrintWriter(destinoGc);
+            
+            try {
+                impresoraAst.write(aS.getAst().imprimeAST());
+                impresoraTs.write(aS.getTs().imprimeTS());
+                impresoraGc.write(cG.getCodigo());
+            }catch (Exception e) {
+                e.printStackTrace();
+            }finally {
+                    impresoraTs.close();
+                    impresoraAst.close();
+                    impresoraGc.close();
+            }
+        }catch(ExcepcionSintactica eS){
+            System.out.println(eS.toString());
         }catch(Exception e) {
             e.printStackTrace();
         }
-        try {
-            impresora.write(aS.getTs().imprimeTS());
-        }catch (Exception e) {
-            e.printStackTrace();
-        }finally {
-            try {
-                impresora.close();
-            }catch(Exception e2) {
-                e2.printStackTrace();
-            }
-        }
+        
         
     }
 }

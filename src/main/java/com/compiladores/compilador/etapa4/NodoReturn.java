@@ -5,26 +5,32 @@
  */
 package com.compiladores.compilador.etapa4;
 
-import com.compiladores.compilador.etapa1.Token;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
+import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 
 /**
  *
- * @author gx23
+ * @author Gaston Cavallo
  */
 public class NodoReturn extends NodoSentencia{
     
     private NodoExpresion retorno;
     
-    public NodoReturn(Token tok, NodoExpresion ret){
-        super(tok);
+    public NodoReturn(int filaTok,int colTok, NodoExpresion ret){
+        super(filaTok,colTok);
         this.retorno = ret;
     }
 
     @Override
-    public boolean verifica() throws ExcepcionSemantica{
-        return retorno.verifica();
+    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica{
+        return retorno.verifica(ts);
     }
     
+    
+    @Override
+    public String imprimeSentencia() {
+        return "\"nodo\":\"NodoReturn\",\n\"tipo\":\""+this.retorno.getTipoImpreso()+"\",\n\"valor\":{"+this.retorno.imprimeSentencia()+"}";
+    }
+
     
 }

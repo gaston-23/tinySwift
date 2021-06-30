@@ -11,7 +11,7 @@ package com.compiladores.compilador.etapa3;
  */
 public class EntradaConstante{
     private String tipo;
-    private int fila, columna;
+    private int fila, columna,posicion;
     
     public EntradaConstante(String tipo,int fila,int col){
         this.tipo = tipo;
@@ -19,9 +19,21 @@ public class EntradaConstante{
         this.columna = col;
     }
     public String imprimeConst(){
-        return "\"Tipo\": \""+this.tipo+"\"";
+        return "\"Tipo\": \""+this.tipo+"\",\n\"Posicion\": \""+this.posicion+"\"";
     }
 
+    public String generaCodigo(){
+        if (this.tipo.equals("String") || this.tipo.equals("Char")){
+            return ".asciiz \"\"";
+        }else{
+            if(this.tipo.equals("Int") || this.tipo.equals("Bool")) {
+                return ".word 0";
+            }else{
+                return ".space ";
+            }
+        }
+    }
+    
     public String getTipo() {
         return tipo;
     }
@@ -33,4 +45,13 @@ public class EntradaConstante{
     public int getFila() {
         return fila;
     }
+
+    public void setPosicion(int posicion) {
+        this.posicion = posicion;
+    }
+
+    public int getPosicion() {
+        return posicion;
+    }
+    
 }

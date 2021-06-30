@@ -7,10 +7,11 @@ package com.compiladores.compilador.etapa4;
 
 import com.compiladores.compilador.etapa1.Token;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
+import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 
 /**
  *
- * @author gx23
+ * @author  Gaston Cavallo
  */
 public class NodoAsignacion extends NodoExpresion{
     
@@ -19,9 +20,15 @@ public class NodoAsignacion extends NodoExpresion{
 
     private String tipoAsig;
     
-    public NodoAsignacion(Token tok,NodoExpresion izqui, NodoExpresion dere,String tipo){
-        super(tok);
+    public NodoAsignacion(int filaTok,int colTok,NodoExpresion izqui, NodoExpresion dere,String tipo){
+        super(filaTok,colTok);
         this.der= dere;
+        this.izq = izqui;
+        this.tipoAsig = tipo;
+    }
+    
+    public NodoAsignacion(int filaTok,int colTok,NodoExpresion izqui,String tipo){
+        super(filaTok,colTok);
         this.izq = izqui;
         this.tipoAsig = tipo;
     }
@@ -35,25 +42,63 @@ public class NodoAsignacion extends NodoExpresion{
     }
 
     @Override
-    public String getTipo() {
-        return this.izq.getTipo();
+    public String getTipo(TablaDeSimbolos ts) throws ExcepcionSemantica {
+        return this.izq.getTipo(ts);
     }
 
     public String getTipoAsig() {
         return tipoAsig;
     }
+
+    public NodoExpresion getIzq() {
+        return izq;
+    }
+
+    public NodoExpresion getDer() {
+        return der;
+    }
+    
     
 
     @Override
-    public boolean verifica() throws ExcepcionSemantica {
-        //TODO verificar herencias y compatibilidades
-        //TODO if tipoAsig es != primitivo throw err 
-        if(izq.getTipo().equals(der.getTipo())){
+    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica {
+        
+        if(izq.getTipo(ts).equals(der.getTipo(ts)) || der.getTipo(ts).equals("nil")){
             return true;
         }else{
-            throw new ExcepcionSemantica(this.getToken(),"La asignacion contiene tipos incompatibles",this.getToken().getValor(),false);
+            
+            if(ts.getClases().get(der.getTipo(ts)).hereda(izq.getTipo(ts),ts)){
+                return true;
+            }
+            String comp = this.izq.getTipo(ts)+ " y "+this.der.getTipo(ts);
+            throw new ExcepcionSemantica(this.getFila(),this.getCol(),"La asignacion contiene tipos incompatibles",comp,false);
         }
     }
     
     
+    @Override
+    public String imprimeSentencia() {
+        return "\"nodo\": \"NodoAsignacion\",\n"
+                + "\"ladoIzq\":{\n"+this.izq.imprimeSentencia()+"\n},\n"
+                + "\"tipoAsignacion\":\""+this.tipoAsig+"\",\n"
+                + "\"ladoDer\":{"+this.der.imprimeSentencia()+"\n}";
+    }
+
+    
+    
+    @Override
+    public String getCodigo(TablaDeSimbolos ts){
+        // la $t0, value
+        // li $t1, der
+        // sw $t1, 0($t0)
+//        String asm = "\tsw $ra, ($s7)\n";
+        String asm = "";
+        
+        asm += this.izq.getCodigo(ts);
+        asm += "\tla $t7, ($t1)\n";
+        asm += this.der.getCodigo(ts);
+        asm += "\tsw $t1, ($t7)\n";
+        
+        return asm;
+    }
 }
