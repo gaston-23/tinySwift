@@ -72,19 +72,10 @@ public class NodoLLamadaMetodo extends NodoExpresion{
     }
 
     public String getMaxPadre(){
-        if(this.padre!= null && this.padre.getClass().equals(NodoExpresion.class)){
+        if(this.padre.getClass().equals(NodoExpresion.class)){
             return this.padre.getTipoImpreso()!=null? this.padre.getTipoImpreso() : this.padre.getNombre();
         }else{
-            if(this.padre == null){
-                if(this.getNombre().equals("constructor")){
-                    return this.clasePadre;
-                }else{
-                    System.out.println("Verificar relacion");
-                    return this.clasePadre;
-                }
-            }else{
-                return ((NodoLLamadaMetodo)this.padre).getMaxPadre();
-            }
+            return ((NodoLLamadaMetodo)this.padre).getMaxPadre();
         }
     }
     @Override
