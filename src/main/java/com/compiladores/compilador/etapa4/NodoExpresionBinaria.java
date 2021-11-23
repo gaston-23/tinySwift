@@ -41,7 +41,7 @@ public class NodoExpresionBinaria extends NodoExpresion {
                 throw new ExcepcionSemantica(this.getFila(),this.getCol(),"La expresion contiene tipos incompatibles",comp,false);
             }
         }else{
-            if(this.oper.equals("*") && this.oper.equals("+") && this.oper.equals("/") && this.oper.equals("%") && this.oper.equals("-") && this.oper.equals("<") && this.oper.equals(">") && this.oper.equals("<=") && this.oper.equals(">=") ){
+            if(this.oper.equals("*") || this.oper.equals("+") || this.oper.equals("/") || this.oper.equals("%") || this.oper.equals("-") || this.oper.equals("<") || this.oper.equals(">") || this.oper.equals("<=") || this.oper.equals(">=") ){
                 if(der.getTipo(ts).equals(izq.getTipo(ts)) && der.getTipo(ts).equals("Int")){
                     return true;
                 }else{

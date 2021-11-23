@@ -1184,15 +1184,15 @@ public class AnalizadorSintactico {
                         if(macheo("id_objeto")){
                             this.ast.popScope();
                             this.ast.pushScope(new NodoExpresion(fila,col,auxNom));
-                            EntradaVar auxType = this.ts.getMetodoActual().getVariablesMet().get(auxNom) ;
+                            EntradaVar auxType = this.ts.getMetodoActual() != null? this.ts.getMetodoActual().getVariablesMet().get(auxNom) : null ;
                             String auxTipo = null ;
                             if(auxType != null ){
                                auxTipo =  auxType.getTipo();
                             }else{
-                                if(this.ts.getMetodoActual().getConstanteMet().containsKey(auxNom)){
+                                if(this.ts.getMetodoActual() != null && this.ts.getMetodoActual().getConstanteMet().containsKey(auxNom)){
                                     auxTipo = this.ts.getMetodoActual().getConstanteMet().get(auxNom).getTipo();
                                 }else{
-                                    if(this.ts.getMetodoActual().existPar(auxNom)){
+                                    if(this.ts.getMetodoActual() != null && this.ts.getMetodoActual().existPar(auxNom)){
                                         auxTipo = this.ts.getMetodoActual().getParByName(auxNom).getTipo();
                                     }else{
                                         if(this.ts.getClaseActual().getVariablesInst().containsKey(auxNom)){
@@ -1202,7 +1202,8 @@ public class AnalizadorSintactico {
                                                 auxTipo = this.ts.getClaseActual().getConstantes().get(auxNom).getTipo();
                                             }else{
                                                 //no esta declarado todavia
-                                                //System.out.println("ERROR DE IMPLEMENTACION NO SE ENCUENTRA EL TIPO DE LA CLASE EN LA FILA "+fila);
+//                                                System.out.println("ERROR DE IMPLEMENTACION NO SE ENCUENTRA EL TIPO DE LA CLASE EN LA FILA "+fila);
+//                                                throw new ExcepcionSemantica(tokenActual.getFila(), tokenActual.getColumna(),"El identificador de objeto no fue declarado o no fue inicializado todavia", tokenActual.getValor(),true);
                                             }
                                         }
                                     }

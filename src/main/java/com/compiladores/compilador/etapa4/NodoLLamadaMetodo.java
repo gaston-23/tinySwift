@@ -72,10 +72,19 @@ public class NodoLLamadaMetodo extends NodoExpresion{
     }
 
     public String getMaxPadre(){
-        if(this.padre.getClass().equals(NodoExpresion.class)){
+        if(this.padre!= null && this.padre.getClass().equals(NodoExpresion.class)){
             return this.padre.getTipoImpreso()!=null? this.padre.getTipoImpreso() : this.padre.getNombre();
         }else{
-            return ((NodoLLamadaMetodo)this.padre).getMaxPadre();
+            if(this.padre == null){
+                if(this.getNombre().equals("constructor")){
+                    return this.clasePadre;
+                }else{
+                    System.out.println("Verificar relacion");
+                    return this.clasePadre;
+                }
+            }else{
+                return ((NodoLLamadaMetodo)this.padre).getMaxPadre();
+            }
         }
     }
     @Override
@@ -114,7 +123,7 @@ public class NodoLLamadaMetodo extends NodoExpresion{
                     parAux = this.padre.getTipo(ts);
                 }
             }
-            if(parAux != null && !ts.getClases().get(parAux).getConstantes().contains(this.nombre) && !ts.getClases().get(parAux).getVariablesInst().contains(this.nombre)){
+            if(parAux != null && !ts.getClases().get(parAux).getConstantes().containsKey(this.nombre) && !ts.getClases().get(parAux).getVariablesInst().contains(this.nombre)){
                 throw new ExcepcionSemantica(this.getFila(),this.getCol(),"El identificador no fue declarado o no es accesible por la clase",this.nombre,false);
             }
         }
@@ -199,7 +208,7 @@ public class NodoLLamadaMetodo extends NodoExpresion{
         if(this.isMetodo()){
             for (int i = 0; i < args.size(); i++) {
                 NodoExpresion argAux = args.get(i);
-                int size = argAux.getTipoImpreso().equals("String") ? 32 : 4;
+                //int size = argAux.getTipoImpreso().equals("String") ? 32 : 4;
                 //int pos = (i + 1 )* size;
                 asm += argAux.getCodigo(ts);
                 if(!argAux.getNombre().equals("literal")){
