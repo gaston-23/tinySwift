@@ -52,22 +52,15 @@ public class AnalizadorSintactico {
    public AnalizadorSintactico (AnalizadorLexico aL, String archivo)throws ExcepcionSintactica,ExcepcionSemantica {
         this.al = aL;
         this.tokenActual = al.nextToken();
-        boolean exito = true;
+        
         this.ts = new TablaDeSimbolos(archivo);
         this.ast = new ArbolSintacticoAbstracto(archivo);
-//        try{
-            this.program();
-//        }catch(ExcepcionSintactica | ExcepcionSemantica  eS){
-//            System.out.println(eS.toString());
-//            exito = false;
-//        }catch(Exception e){
-//            e.printStackTrace();
-//            exito = false;
-//        }
-        if(exito && this.mainMethod){
+        this.program();
+
+        if(this.mainMethod){
             System.out.println("CORRECTO: ANALISIS SINTACTICO");
         }else{
-            if(!this.mainMethod) throw new ExcepcionSintactica(tokenActual,"El codigo no tiene una clase Main", "EOF");
+            throw new ExcepcionSintactica(tokenActual,"El codigo no tiene una clase Main", "EOF");
         }
     }
     
@@ -381,19 +374,14 @@ public class AnalizadorSintactico {
         //System.out.println("restoMetodoEstatico :: "+this.tokenActual.getValor());
         String auxTipo = this.tokenActual.getValor();
         int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
-        if(!macheo("void")){
-            if(!macheo("String")){
-                if(!macheo("Bool")){
-                    if(!macheo("Int")){
-                        if(!macheo("Char")){
-                            if(!macheo("id_clase")){
-                                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'void' o  'String' , 'Bool' , 'Int' , 'Char', 'id_clase'", tokenActual.getValor());
-  
-                            }
-                        }
-                    }
-                }
-            }
+        if( !macheo("void")     && 
+            !macheo("String")   && 
+            !macheo("Bool")     && 
+            !macheo("Int")      && 
+            !macheo("Char")     && 
+            !macheo("id_clase")){
+            throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'void' o  'String' , 'Bool' , 'Int' , 'Char', 'id_clase'", tokenActual.getValor());
+
         }else{
             if(this.psfvm == 2 && this.mainClass){
                 this.psfvm++;
@@ -565,14 +553,11 @@ public class AnalizadorSintactico {
 
     private void tipoPrimitivo() throws ExcepcionSintactica,ExcepcionSemantica {
         //System.out.println("tipoPrimitivo :: "+this.tokenActual.getValor());
-        if(!macheo("String")){
-            if(!macheo("Bool")){
-                if(!macheo("Int")){
-                    if(!macheo("Char")){
-                        throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char'", tokenActual.getValor());
-                    }
-                }
-            }
+        if( !macheo("String")&&
+            !macheo("Bool")  &&
+            !macheo("Int")   &&
+            !macheo("Char")){
+                throw new ExcepcionSintactica(tokenActual,"se esperaba un token 'String' , 'Bool' , 'Int' , 'Char'", tokenActual.getValor());
         }
     }
 
@@ -767,7 +752,7 @@ public class AnalizadorSintactico {
         if(verifico("id_objeto")){ 
             //TODO puede fallar sino esta en el metodo
             EntradaVar varAux = this.ts.getMetodoActual().getVariablesMet().get(auxNom);
-            String auxTipo = null;
+            
             if(varAux == null){
                 varAux = this.ts.getClaseActual().getVariablesInst().get(auxNom);
                 if(varAux == null){
@@ -1071,10 +1056,9 @@ public class AnalizadorSintactico {
     private void opIgual() throws ExcepcionSintactica,ExcepcionSemantica {
         //System.out.println("opIgual :: "+this.tokenActual.getValor());
         String oper = this.tokenActual.getValor();
-        if(!macheo("==")){
-            if(!macheo("!=")){
+        if( !macheo("==") &&
+            !macheo("!=")){
                 throw new ExcepcionSintactica(tokenActual,"se esperaba un token '!=' , '=='", tokenActual.getValor());
-            }
         }
         ((NodoExpresionBinaria) this.ast.peekScope()).setOper(oper);
     }
