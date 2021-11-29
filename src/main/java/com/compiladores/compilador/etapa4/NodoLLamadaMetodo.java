@@ -22,6 +22,7 @@ public class NodoLLamadaMetodo extends NodoExpresion{
     private String tipo;
     private LinkedList<NodoExpresion> args;
     private boolean metodo;
+    private int offset;
     
     public NodoLLamadaMetodo(int filaTok,int colTok,String nombre,NodoExpresion padre){
         super(filaTok,colTok);
@@ -43,6 +44,7 @@ public class NodoLLamadaMetodo extends NodoExpresion{
         this.args.add(arg);
     }
 
+    @Override
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
@@ -67,6 +69,7 @@ public class NodoLLamadaMetodo extends NodoExpresion{
         return padre;
     }
 
+    @Override
     public void setTipo(String tipo) {
         this.tipo = tipo;
     }
@@ -114,6 +117,7 @@ public class NodoLLamadaMetodo extends NodoExpresion{
                     throw new ExcepcionSemantica(this.getFila(),this.getCol(),"El numero de argumentos formales excede lo esperado","por lo menos "+String.valueOf(i+1)+" argumentos",false);
                 }
             }
+            this.offset = eC != null ? eC.getPosicion() : 0;
         }else{
             String parAux = null;
             if(this.clasePadre!=null){
@@ -123,7 +127,7 @@ public class NodoLLamadaMetodo extends NodoExpresion{
                     parAux = this.padre.getTipo(ts);
                 }
             }
-            if(parAux != null && !ts.getClases().get(parAux).getConstantes().containsKey(this.nombre) && !ts.getClases().get(parAux).getVariablesInst().contains(this.nombre)){
+            if(parAux != null && !ts.getClases().get(parAux).getConstantes().containsKey(this.nombre) && !ts.getClases().get(parAux).getVariablesInst().containsKey(this.nombre)){
                 throw new ExcepcionSemantica(this.getFila(),this.getCol(),"El identificador no fue declarado o no es accesible por la clase",this.nombre,false);
             }
         }
@@ -174,7 +178,7 @@ public class NodoLLamadaMetodo extends NodoExpresion{
     
     @Override
     public String imprimeSentencia() {
-        String padreClase = "",json="",padreSentencia ="",metodo = "";
+        String padreClase = "",json="",padreSentencia ="",met = "";
         if(this.clasePadre!=null){
             padreClase = ",\n\"padre\":\""+this.clasePadre+"\"\n";
         }
@@ -182,14 +186,14 @@ public class NodoLLamadaMetodo extends NodoExpresion{
             padreSentencia = ",\n\"padre\":{"+this.padre.imprimeSentencia()+"\n}";
         }
         if(this.metodo ){
-            metodo = ",\n\"isMetodo\":\""+this.isMetodo()+"\"\n";
+            met = ",\n\"isMetodo\":\""+this.isMetodo()+"\"\n";
         }
         json= "\"nodo\": \"NodoLlamadaMetodo\",\n"
                 + "\"nombre\":\n\""+this.nombre+"\""
                 + ",\n\"tipo\":\n\""+this.tipo+"\""
                 + padreClase
                 + padreSentencia 
-                + metodo + "\n";
+                + met + "\n";
         if(!this.args.isEmpty()){
             json +=",\n \"args\":[";
             for (int i = 0; i < args.size(); i++) {
@@ -205,8 +209,8 @@ public class NodoLLamadaMetodo extends NodoExpresion{
     @Override
     public String getCodigo(TablaDeSimbolos ts) {
         String asm = "\tsw $fp, 0($sp)\n\taddiu $sp, $sp, -4\n";
-        if(this.isMetodo()){
-            for (int i = 0; i < args.size(); i++) {
+        if(this.isMetodo()){ //cargar objeto primero
+            for (int i = 0; i < args.size(); i++) { //carga parametros
                 NodoExpresion argAux = args.get(i);
                 //int size = argAux.getTipoImpreso().equals("String") ? 32 : 4;
                 //int pos = (i + 1 )* size;
@@ -215,7 +219,7 @@ public class NodoLLamadaMetodo extends NodoExpresion{
                     asm +="\tlw $t1, 0($t1)\n";
                 }
 //                asm +="\tsw $t1, 0($sp)\n\taddiu $sp, $sp, -"+size+"\n";
-                asm +="\tsw $t1, 0($sp)\n\taddiu $sp, $sp, -4"+"\n";
+                asm +="\tsw $t1, 0($sp)\n\taddiu $sp, $sp, -4\n";
             }
         }
         if(this.clasePadre != null){
@@ -223,7 +227,14 @@ public class NodoLLamadaMetodo extends NodoExpresion{
             if(this.nombre.equals("constructor")){
                 asm +="\tla $a0, "+this.clasePadre+"_temp\n";
             }
-            asm +="\tjal "+this.clasePadre+"_"+nombre+"\n"; //funciona con mas de un param??
+            if (this.metodo && !this.nombre.equals("constructor") && !(this.clasePadre.equals("Bool") || this.clasePadre.equals("String") || this.clasePadre.equals("Char") || this.clasePadre.equals("Int") || this.clasePadre.equals("IO") )){
+                asm += "\tla $t0, "+this.clasePadre+"_vtable\n";
+                asm += "\tsw $t0, 0($a0)\n";
+                asm += "\tlw $t0, "+this.offset*4+"($t0) \n";
+                asm += "\tjalr $t0\n";
+            }else{
+                asm +="\tjal "+this.clasePadre+"_"+nombre+"\n"; //funciona con mas de un param??
+            }
         }else{
             if(this.padre.getNombre().equals("self")){
                 if(!this.isMetodo()){

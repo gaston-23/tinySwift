@@ -6,16 +6,13 @@
 package com.compiladores.compilador.etapa3;
 
 import com.compiladores.compilador.etapa2.AnalizadorSintactico;
+import com.compiladores.compilador.etapa2.ExcepcionSintactica;
 import com.compiladores.compilador.etapa4.ArbolSintacticoAbstracto;
-import com.compiladores.compilador.etapa4.NodoAST;
 import com.compiladores.compilador.etapa4.NodoAsignacion;
 import com.compiladores.compilador.etapa4.NodoClase;
-import com.compiladores.compilador.etapa4.NodoExpresion;
-import com.compiladores.compilador.etapa4.NodoExpresionUnaria;
-import com.compiladores.compilador.etapa4.NodoLLamadaMetodo;
 import com.compiladores.compilador.etapa4.NodoMetodo;
 import com.compiladores.compilador.etapa4.NodoSentencia;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -38,9 +35,12 @@ public class AnalizadorSemantico {
             this.verificaHerenciaCircular();
             this.consolidarTS();
             this.consolidarAST();
-        }catch(ExcepcionSemantica eS){
-            System.out.println(eS.mensaje);
+        }catch(ExcepcionSintactica | ExcepcionSemantica eS){
+            System.out.println(eS.toString());
             exito = false;
+        }catch(Exception e){
+            System.out.println("Excepcion no capturada ");
+            e.printStackTrace();
         }
         if(exito){ 
             System.out.println("CORRECTO: ANALISIS SEMANTICO - DECLARACIONES");
@@ -50,7 +50,7 @@ public class AnalizadorSemantico {
     
     public void verificaHerenciaCircular() throws ExcepcionSemantica{
         Queue<String> verif = new LinkedList<>();        
-        Hashtable<String, String> finalizados = new Hashtable<>();
+        HashMap<String, String> finalizados = new HashMap<>();
 
         verif.add("Object");
         while(finalizados.size()<this.ts.getClases().size()){
@@ -69,10 +69,9 @@ public class AnalizadorSemantico {
             if(verif.isEmpty() && finalizados.size()<this.ts.getClases().size()){
                 for(Map.Entry<String, EntradaClase> entry : this.ts.getClases().entrySet()) {
                     String key = entry.getKey();
-                    EntradaClase c = entry.getValue();
+                    
                     if(!finalizados.containsKey(key)){
                         verif.add(key);
-                        continue;
                     }
                 }
             }
@@ -111,12 +110,16 @@ public class AnalizadorSemantico {
                     if(!this.existeTipo(cte.getTipo())){
                         throw new ExcepcionSemantica(cte.getFila(),cte.getColumna(),"No existe el tipo de declaracion",cte.getTipo(),true);
                     }
+                    eC.incTamaño(this.ts.getClases().get(cte.getTipo()).getTamaño());
+                    cte.setTamaño(eC.getTamaño());
                 }
                 for(Map.Entry<String, EntradaVar> vars : eC.getVariablesInst().entrySet()) {
-                    EntradaVar var = vars.getValue();
-                    if(!this.existeTipo(var.getTipo())){
-                        throw new ExcepcionSemantica(var.getFila(),var.getColumna(),"No existe el tipo de declaracion",var.getTipo(),true);
+                    EntradaVar varble = vars.getValue();
+                    if(!this.existeTipo(varble.getTipo())){
+                        throw new ExcepcionSemantica(varble.getFila(),varble.getColumna(),"No existe el tipo de declaracion",varble.getTipo(),true);
                     }
+                    eC.incTamaño(this.ts.getClases().get(varble.getTipo()).getTamaño());
+                    varble.setTamaño(eC.getTamaño());
                 }
                 for(Map.Entry<String, EntradaMetodo> mets : eC.getMetodos().entrySet()) {
                     EntradaMetodo met = mets.getValue();
@@ -157,10 +160,12 @@ public class AnalizadorSemantico {
                         throw new ExcepcionSemantica(auxM.getFila(),auxM.getColumna(),"Los atributos de un metodo heredado deben tener el mismo nombre",auxM.getNombre(),true);
                     }
                 }
+                eC.moveVtable(metH.getKey(), padre.getPosicion(metH.getKey()));
             }else{
-                eC.insertaMetodo(metH.getKey(), meth);
+                eC.insertaMetodo(metH.getKey(), meth, padre.getNombre(),padre.getPosicion(metH.getKey()));
             }
         }
+        
         for(Map.Entry<String, EntradaVar> varsH : padre.getVariablesInst().entrySet()) {
             EntradaVar varsh = varsH.getValue();
             EntradaVar auxV = eC.getVariablesInst().get(varsH.getKey());
@@ -179,11 +184,11 @@ public class AnalizadorSemantico {
                 eC.insertaConstante(key, cte);
             }
         }
-                
+        eC.enumeraMetodos();
         eC.setConsolidado(true);
     }
     
-    public void consolidarAST() throws ExcepcionSemantica{
+    public void consolidarAST() throws ExcepcionSemantica,ExcepcionSintactica{
         for(Map.Entry<String, NodoClase> entry : this.ast.getClases().entrySet()) {
             NodoClase value = entry.getValue();
             if(!value.getMetodos().isEmpty()){

@@ -24,12 +24,12 @@ public class ExcepcionSemantica  extends Exception {
      */
     public ExcepcionSemantica (int fila, int col, String expectativa, String valor, boolean declaracion) {
         String etapa = declaracion? "DECLARACIONES" : "SENTENCIAS";
-        this.mensaje = "ERROR: SEMANTICO "+etapa+" | LINEA: "+fila+" | COLUMNA: "+ col +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
+        this.mensaje = "ERROR SEMANTICO "+etapa+": | LINEA: "+fila+" | COLUMNA: "+ col +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
     }
 
     public ExcepcionSemantica (Token token, String expectativa, String valor, boolean declaracion) {
         String etapa = declaracion? "DECLARACIONES" : "SENTENCIAS";
-        this.mensaje = "ERROR: SEMANTICO "+etapa+" | LINEA: "+token.getFila()+" | COLUMNA: "+ token.getColumna() +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
+        this.mensaje = "ERROR SEMANTICO "+etapa+": | LINEA: "+token.getFila()+" | COLUMNA: "+ token.getColumna() +" | DESCRIPCION: "+expectativa+" , se encontro: "+valor +" |";
     }
 
     @Override

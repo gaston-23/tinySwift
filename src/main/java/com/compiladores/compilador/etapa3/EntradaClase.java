@@ -5,7 +5,8 @@
  */
 package com.compiladores.compilador.etapa3;
 
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -13,23 +14,27 @@ import java.util.Map;
  * @author Gaston Cavallo
  */
 public class EntradaClase{
-    private Hashtable<String,EntradaMetodo> metodos;
+    private HashMap<String,EntradaMetodo> metodos;
     private String nombre;
-    private Hashtable<String, EntradaVar> variablesInst;
+    private HashMap<String, EntradaVar> variablesInst;
     private String herencia;
-    private Hashtable<String,EntradaConstante> constantes;
+    private HashMap<String,EntradaConstante> constantes;
     private EntradaMetodo constructor=null;
     private boolean consolidado=false;
     private int fila, columna, posAtri=0;
+    private int tamaño;
+    private LinkedList<String> vtable;
     
-    public EntradaClase(String tipo,String herencia,int fila,int col){
+    public EntradaClase(String tipo,String herencia,int fila,int col, int tam){
         this.nombre = tipo;
         this.herencia = herencia;
-        this.metodos = new Hashtable<>();
-        this.constantes = new Hashtable<>();
-        this.variablesInst = new Hashtable<>();
+        this.metodos = new HashMap<>();
+        this.constantes = new HashMap<>();
+        this.variablesInst = new HashMap<>();
         this.columna = col;
         this.fila = fila;
+        this.tamaño = tam;
+        this.vtable = new LinkedList<>();
     }
     
     public void insertaMetodo(String nombre, String retorno){
@@ -48,15 +53,69 @@ public class EntradaClase{
 
             }
             this.metodos.put(nombre, metodo);
+            this.vtable.add("\t.word "+this.nombre+"_"+nombre);
+        }
+    }
 
+    public void insertaMetodo(String nombre, EntradaMetodo metodo, String heredado, int pos) throws ExcepcionSemantica{
+        if(nombre.equals("constructor")){
+            if(this.constructor!= null){
+                throw new ExcepcionSemantica(metodo.getFila(),metodo.getColumna(),"Ya se ha declarado un constructor para esta clase",nombre,true);
+            }
+            this.constructor = metodo;
+        }else{
+            if(this.metodos.get(nombre)!=null){
+                throw new ExcepcionSemantica(metodo.getFila(),metodo.getColumna(),"Ya se ha declarado un metodo con el mismo nombre",nombre,true);
+
+            }
+            this.metodos.put(nombre, metodo);
+            this.vtable.add(pos, "\t.word "+heredado+"_"+nombre);
+        }
+    }
+
+    public int getPosicion(String nombre){
+        for (String met : this.vtable) {
+            if ( met.contains(nombre)){
+                return this.vtable.indexOf(met);
+            }
+        }
+        return -1;
+    }
+
+    public void moveVtable(String method,int pos){
+        String aux = "";
+        for (String met : this.vtable) {
+            if ( met.contains(method)){
+                aux = met;
+                this.vtable.remove(met);
+                this.vtable.add(pos, aux);
+                return;
+            }
+        }
+    }
+
+    public void enumeraMetodos(){
+        if (this.constructor != null) {
+            this.constructor.setPosicion(0);
+        }
+        for(Map.Entry<String, EntradaMetodo> mets : this.metodos.entrySet()) {
+            EntradaMetodo met = mets.getValue();
+            met.setPosicion(getPosicion(mets.getKey()));
         }
     }
     
-    public void insertaVariable(String nombre, EntradaVar var) throws ExcepcionSemantica{
+    /**
+     * @return the vtable
+     */
+    public LinkedList<String> getVtable() {
+        return vtable;
+    }
+
+    public void insertaVariable(String nombre, EntradaVar varble) throws ExcepcionSemantica{
         if(this.variablesInst.get(nombre)!=null){
-            throw new ExcepcionSemantica(var.getFila(),var.getColumna(),"Ya se ha declarado una variable con el mismo nombre",nombre,true);
+            throw new ExcepcionSemantica(varble.getFila(),varble.getColumna(),"Ya se ha declarado una variable con el mismo nombre",nombre,true);
         }
-        this.variablesInst.put(nombre, var);
+        this.variablesInst.put(nombre, varble);
         this.variablesInst.get(nombre).setPosicion(this.posAtri);
         this.posAtri++;
     }
@@ -110,15 +169,15 @@ public class EntradaClase{
         return constructor;
     }
 
-    public Hashtable<String, EntradaConstante> getConstantes() {
+    public HashMap<String, EntradaConstante> getConstantes() {
         return constantes;
     }
 
-    public Hashtable<String, EntradaMetodo> getMetodos() {
+    public HashMap<String, EntradaMetodo> getMetodos() {
         return metodos;
     }
 
-    public Hashtable<String, EntradaVar> getVariablesInst() {
+    public HashMap<String, EntradaVar> getVariablesInst() {
         return variablesInst;
     }
     
@@ -128,6 +187,20 @@ public class EntradaClase{
 
     public int getFila() {
         return fila;
+    }
+    
+    /**
+     * @param tamaño the tamaño to set
+     */
+    public void incTamaño(int tamaño) {
+        this.tamaño += tamaño;
+    }
+
+    /**
+     * @return the tamaño
+     */
+    public int getTamaño() {
+        return tamaño;
     }
     
     public String imprimirEC(){

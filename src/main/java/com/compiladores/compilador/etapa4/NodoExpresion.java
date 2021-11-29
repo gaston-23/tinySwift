@@ -5,6 +5,7 @@
  */
 package com.compiladores.compilador.etapa4;
 
+import com.compiladores.compilador.etapa2.ExcepcionSintactica;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
 import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 
@@ -67,7 +68,7 @@ public class NodoExpresion extends NodoSentencia{
     }
 
     @Override
-    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica {
+    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica,ExcepcionSintactica {
         return true;
     }
 

@@ -37,7 +37,7 @@ public class AnalizadorLexico {
 				if (comentado == 2) {
 					throw new ExcepcionLexica(fila, fila, "se esperaba fin de literal cadena", "fin de linea");
 				}
-				else if ( !(comentado == 1 && !linea.contains("*/")) || !(linea.equals(" ") || linea.length() == 0)){
+				else if ( !(comentado == 1 && !linea.contains("*/")) && !(linea.equals(" ") || linea.length() == 0)){
 					comentado = this.extractToken(linea.toCharArray(), fila, comentado);
 				}
 			}

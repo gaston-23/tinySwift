@@ -5,7 +5,7 @@
  */
 package com.compiladores.compilador.etapa4;
 
-import com.compiladores.compilador.etapa1.Token;
+import com.compiladores.compilador.etapa2.ExcepcionSintactica;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
 import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 import java.util.LinkedList;
@@ -39,15 +39,13 @@ public class NodoWhile extends NodoSentencia{
     // verificar condicion y loop si es correcto semanticamente.. es suficiente?
 
     @Override
-    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica {
+    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica,ExcepcionSintactica {
         if(!this.declaracion.checkIsBoolean(ts)){
             throw new ExcepcionSemantica(this.declaracion.getFila(),this.declaracion.getCol(),"No es una declaracion de tipo booleana",this.declaracion.getTipo(ts),false);
         }
-        this.loop.forEach((elem)  -> {
-            try{
-                elem.verifica(ts);
-            }catch(ExcepcionSemantica eS){}
-        });
+        for (NodoSentencia elem : (Iterable<NodoSentencia>) this.loop::iterator) {
+            if(elem != null) elem.verifica(ts);
+        }
         return true;
     }
     

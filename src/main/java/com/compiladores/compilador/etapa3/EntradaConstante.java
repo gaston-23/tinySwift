@@ -12,6 +12,7 @@ package com.compiladores.compilador.etapa3;
 public class EntradaConstante{
     private String tipo;
     private int fila, columna,posicion;
+    private int tamaño;
     
     public EntradaConstante(String tipo,int fila,int col){
         this.tipo = tipo;
@@ -27,9 +28,9 @@ public class EntradaConstante{
             return ".asciiz \"\"";
         }else{
             if(this.tipo.equals("Int") || this.tipo.equals("Bool")) {
-                return ".word 0";
+                return ".word 4";
             }else{
-                return ".space ";
+                return ".space "+this.tamaño;
             }
         }
     }
@@ -52,6 +53,20 @@ public class EntradaConstante{
 
     public int getPosicion() {
         return posicion;
+    }
+
+    /**
+     * @param tamaño the tamaño to set
+     */
+    public void setTamaño(int tamaño) {
+        this.tamaño = tamaño;
+    }
+
+    /**
+     * @return the tamaño
+     */
+    public int getTamaño() {
+        return tamaño;
     }
     
 }

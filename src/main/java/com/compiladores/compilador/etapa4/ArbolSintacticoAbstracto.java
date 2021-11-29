@@ -5,10 +5,10 @@
  */
 package com.compiladores.compilador.etapa4;
 
+import com.compiladores.compilador.etapa2.ExcepcionSintactica;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
 import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Stack;
 
@@ -70,7 +70,7 @@ public class ArbolSintacticoAbstracto {
         return json;
     }
     
-    public boolean verifica(TablaDeSimbolos ts)throws ExcepcionSemantica{
+    public boolean verifica(TablaDeSimbolos ts)throws ExcepcionSemantica,ExcepcionSintactica{
         for (int i = 0; i < scope.size(); i++) {
             NodoClase nC = (NodoClase) scope.get(i);
             nC.verifica(ts);

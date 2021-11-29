@@ -5,7 +5,7 @@
  */
 package com.compiladores.compilador.etapa4;
 
-import com.compiladores.compilador.etapa1.Token;
+import com.compiladores.compilador.etapa2.ExcepcionSintactica;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
 import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 
@@ -34,7 +34,7 @@ public class NodoAST {
         return "\"nodo\":\"NodoAST\"";
     }
     
-    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica {
+    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica,ExcepcionSintactica {
         return true;
     }
     public String getCodigo(TablaDeSimbolos ts){

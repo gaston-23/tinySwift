@@ -5,7 +5,6 @@
  */
 package com.compiladores.compilador.etapa4;
 
-import com.compiladores.compilador.etapa1.Token;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
 import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 

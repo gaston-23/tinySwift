@@ -68,7 +68,7 @@ public class AnalizadorSintactico {
     * funcion macheo
     * se encarga de machear el token con la cadena w, si coincide pide un nextToken al AnalizadorLexico y retorna true
     * @param w
-    * @return
+    * @return 
     * @throws ExcepcionSintactica 
     */
     private boolean macheo(String w){
@@ -130,7 +130,7 @@ public class AnalizadorSintactico {
             String lexActual = tokenActual.getValor();
             int fil = this.tokenActual.getFila(), col = this.tokenActual.getColumna();
             if(macheo("id_clase")){
-                this.ts.setClaseActual(new EntradaClase(lexActual,"Object",fil,col));
+                this.ts.setClaseActual(new EntradaClase(lexActual,"Object",fil,col,4));
                 NodoClase nC = new NodoClase(fil,col,lexActual);
                 this.ast.putClase(lexActual, nC);
                 this.ast.pushScope(nC);
@@ -825,7 +825,11 @@ public class AnalizadorSintactico {
             String tipo = null;
             NodoExpresion aux = (NodoExpresion) this.ast.popScope();
             if(aux.getNombre().equals("self")){
-                tipo = (this.ts.getClaseActual().getVariablesInst().get(auxNom).getTipo());
+                EntradaVar eV = this.ts.getClaseActual().getVariablesInst().get(auxNom);
+                if (this.ts.getClaseActual().getConstantes().get(auxNom) != null) {
+                    throw new ExcepcionSintactica(fila, col, "La constante no puede ser reasignada", "self."+auxNom);
+                }
+                tipo = eV != null ? eV.getTipo() : null;
                 aux.setTipo(tipo);
             }
             this.ast.pushScope(new NodoLLamadaMetodo(fila,col,auxNom,aux));
@@ -1372,7 +1376,7 @@ public class AnalizadorSintactico {
                         if(auxClase.getConstantes().containsKey(auxNom)){
                             tipo = (auxClase.getConstantes().get(auxNom).getTipo());
                         }else{
-                            throw new ExcepcionSemantica(tokenActual,"la variable no fue declarada correctamente", tokenActual.getValor(),true);
+                            // throw new ExcepcionSemantica(tokenActual,"la variable no fue declarada correctamente", tokenActual.getValor(),true);
                         }
                     }
                     aux.setTipo(tipo);

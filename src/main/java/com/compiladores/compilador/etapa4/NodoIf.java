@@ -5,6 +5,7 @@
  */
 package com.compiladores.compilador.etapa4;
 
+import com.compiladores.compilador.etapa2.ExcepcionSintactica;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
 import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 import java.util.LinkedList;
@@ -80,21 +81,16 @@ public class NodoIf extends NodoSentencia{
     
     
     @Override
-    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica{
+    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica,ExcepcionSintactica{
         if(!this.declaracion.checkIsBoolean(ts)){
             throw new ExcepcionSemantica(this.declaracion.getFila(),this.declaracion.getCol(),"No es una declaracion de tipo booleana",this.declaracion.getTipo(ts),false);
         } 
-        this.sentenciasThen.forEach((elem) -> {
-            try{
-                
-                if(elem != null) elem.verifica(ts);
-            }catch(ExcepcionSemantica eS){}
-        });
-        this.sentenciasElse.forEach((elem) -> {
-            try{
-                if(elem != null) elem.verifica(ts);
-            }catch(ExcepcionSemantica eS){}
-        });
+        for (NodoSentencia elem : (Iterable<NodoSentencia>) this.sentenciasThen::iterator) {
+            if(elem != null) elem.verifica(ts);
+        }
+        for (NodoSentencia elem : (Iterable<NodoSentencia>) this.sentenciasElse::iterator) {
+            if(elem != null) elem.verifica(ts);
+        }
         return true;
     }
     

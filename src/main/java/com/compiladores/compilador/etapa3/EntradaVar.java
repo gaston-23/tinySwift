@@ -13,6 +13,7 @@ public class EntradaVar{
     private String tipo;
     private boolean isPrivate = false;
     private int fila, columna,posicion;
+    private int tamaño;
     
     public EntradaVar(String tipo,int fila,int col){
         this.tipo = tipo;
@@ -51,6 +52,19 @@ public class EntradaVar{
         return posicion;
     }
     
+    /**
+     * @param tamaño the tamaño to set
+     */
+    public void setTamaño(int tamaño) {
+        this.tamaño = tamaño;
+    }
+
+    /**
+     * @return the tamaño
+     */
+    public int getTamaño() {
+        return tamaño;
+    }
     
     public String imprimeVar(){
         return "\"Tipo\": \""+this.tipo+"\",\n\"isPrivate\": "+ this.isPrivate+",\n\"Posicion\": \""+this.posicion+"\"";
@@ -61,9 +75,9 @@ public class EntradaVar{
             return ".asciiz \"\"";
         }else{
             if(this.tipo.equals("Int") || this.tipo.equals("Bool")) {
-                return ".word 0";
+                return ".word 4";
             }else{
-                return ".space ";
+                return ".space "+this.tamaño;
             }
         }
     }

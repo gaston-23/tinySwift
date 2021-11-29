@@ -5,7 +5,7 @@
  */
 package com.compiladores.compilador.etapa4;
 
-import com.compiladores.compilador.etapa1.Token;
+import com.compiladores.compilador.etapa2.ExcepcionSintactica;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
 import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 
@@ -61,14 +61,19 @@ public class NodoAsignacion extends NodoExpresion{
     
 
     @Override
-    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica {
+    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica,ExcepcionSintactica {
         
+        if (der.getTipo(ts) == null || der.getTipo(ts).equals("void")) {
+            String msg = der.getTipo(ts) == null ? "Error en la declaracion de la expresion " : "Error en la declaracion de la expresion no se puede asignar un tipo void ";
+            throw new ExcepcionSemantica(der.getFila(),der.getCol(),msg,der.getNombre(),true);
+        }
         if(izq.getTipo(ts).equals(der.getTipo(ts)) || der.getTipo(ts).equals("nil")){
-            return true;
+            return der.verifica(ts);
         }else{
             
             if(ts.getClases().get(der.getTipo(ts)).hereda(izq.getTipo(ts),ts)){
-                return true;
+                izq.setTipo(der.getTipo(ts));
+                return der.verifica(ts);
             }
             String comp = this.izq.getTipo(ts)+ " y "+this.der.getTipo(ts);
             throw new ExcepcionSemantica(this.getFila(),this.getCol(),"La asignacion contiene tipos incompatibles",comp,false);

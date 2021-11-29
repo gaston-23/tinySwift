@@ -8,20 +8,16 @@ package com.compiladores.compilador.etapa5;
 import com.compiladores.compilador.etapa3.EntradaClase;
 import com.compiladores.compilador.etapa3.EntradaConstante;
 import com.compiladores.compilador.etapa3.EntradaMetodo;
-import com.compiladores.compilador.etapa3.EntradaParametro;
 import com.compiladores.compilador.etapa3.EntradaVar;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
 import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 import com.compiladores.compilador.etapa4.ArbolSintacticoAbstracto;
-import com.compiladores.compilador.etapa4.NodoAST;
 import com.compiladores.compilador.etapa4.NodoAsignacion;
 import com.compiladores.compilador.etapa4.NodoClase;
-import com.compiladores.compilador.etapa4.NodoLLamadaMetodo;
 import com.compiladores.compilador.etapa4.NodoMetodo;
 import com.compiladores.compilador.etapa4.NodoSentencia;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 
 /**
  *
@@ -31,15 +27,15 @@ public class GeneradorCodigo {
     private TablaDeSimbolos ts;
     private ArbolSintacticoAbstracto ast;
     private String codigo;
-    private Hashtable<String,String> data;
-    private Hashtable<String,String> text;
+    private HashMap<String,String> data;
+    private HashMap<String,String> text;
     
     
     public GeneradorCodigo(TablaDeSimbolos ts, ArbolSintacticoAbstracto ast){
         this.ts = ts;
         this.ast= ast;
-        this.text = new Hashtable<>();
-        this.data = new Hashtable<>();
+        this.text = new HashMap<>();
+        this.data = new HashMap<>();
         try{
             this.generarData();
             this.generaMetodosBasicos();
@@ -63,12 +59,15 @@ public class GeneradorCodigo {
             int cantEsp =0;
             
             String vt = "\n";
-            for(Map.Entry<String, EntradaMetodo> mets : eC.getMetodos().entrySet()) {
-                EntradaMetodo met = mets.getValue();
-                String metK = mets.getKey();
-                vt += "\t.word "+eC.getNombre()+"_"+metK+"\n";
+            // for(Map.Entry<String, EntradaMetodo> mets : eC.getMetodos().entrySet()) {
+            //     EntradaMetodo met = mets.getValue();
+            //     String metK = mets.getKey();
+            //     vt += "\t.word "+eC.getNombre()+"_"+metK+"\n";
                 
-            }  
+            // }  
+            for (String met : eC.getVtable()) {
+                vt += met+"\n";
+            }
 //            if(!vt.equals("\n")){
                 this.data.put(eC.getNombre()+"_vtable:",vt);
                 String cir ="\n\t.word "+eC.getNombre()+"_vtable" ;
@@ -83,10 +82,10 @@ public class GeneradorCodigo {
                 this.data.put(key, dat);
             }
             for(Map.Entry<String, EntradaVar> vars : eC.getVariablesInst().entrySet()) {
-                EntradaVar var = vars.getValue();
+                EntradaVar varble = vars.getValue();
                 String key = "var_"+vars.getKey()+"_"+eC.getNombre()+": ";
-                String dat = var.generaCodigo();
-                cantEsp += var.getTipo().equals("String") ? 32 : 4;
+                String dat = varble.generaCodigo();
+                cantEsp += varble.getTipo().equals("String") ? 32 : 4;
                 this.data.put(key, dat);
             }
             this.data.put(eC.getNombre()+"_temp:",".word "+cantEsp);

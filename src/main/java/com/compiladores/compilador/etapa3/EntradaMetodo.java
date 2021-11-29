@@ -5,7 +5,7 @@
  */
 package com.compiladores.compilador.etapa3;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -18,17 +18,18 @@ public class EntradaMetodo{
     private String tipoRetorno;
     private String nombre;
     private LinkedList<EntradaParametro> parametros;
-    private Hashtable<String,EntradaVar>  variablesMet;    
-    private Hashtable<String,EntradaConstante>  constanteMet;
+    private HashMap<String,EntradaVar>  variablesMet;    
+    private HashMap<String,EntradaConstante>  constanteMet;
     private int fila, columna;
     private boolean isStatic;
     private int posAtri=0;
+    private int posicion;
     
     public EntradaMetodo(String retorno,int fila, int col){
         this.tipoRetorno = retorno;
         this.parametros = new LinkedList<>();
-        this.variablesMet = new Hashtable<>();
-        this.constanteMet = new Hashtable<>();
+        this.variablesMet = new HashMap<>();
+        this.constanteMet = new HashMap<>();
         this.columna = col;
         this.fila = fila;
     }
@@ -36,15 +37,28 @@ public class EntradaMetodo{
         this.parametros.add(new EntradaParametro(tipo,nombrePar,this.parametros.size(),fila,col));
     }
     
-    public void insertaVariable(String nombre, EntradaVar var) throws ExcepcionSemantica{
+    public void insertaVariable(String nombre, EntradaVar varble) throws ExcepcionSemantica{
         if(this.variablesMet.get(nombre)!=null){
-            throw new ExcepcionSemantica(var.getFila(),var.getColumna(),"Ya se ha declarado una variable con el mismo nombre",nombre,true);
+            throw new ExcepcionSemantica(varble.getFila(),varble.getColumna(),"Ya se ha declarado una variable con el mismo nombre",nombre,true);
         }
-        this.variablesMet.put(nombre, var);
+        this.variablesMet.put(nombre, varble);
         this.variablesMet.get(nombre).setPosicion(this.posAtri);
         this.posAtri++;
     }
     
+    /**
+     * @param posicion the posicion to set
+     */
+    public void setPosicion(int posicion) {
+        this.posicion = posicion;
+    }
+    
+    /**
+     * @return the posicion
+     */
+    public int getPosicion() {
+        return posicion;
+    }
     
     public void insertaConstante(String nombre, EntradaConstante k) throws ExcepcionSemantica{
         if(this.constanteMet.get(nombre)!=null){
@@ -75,11 +89,11 @@ public class EntradaMetodo{
         return parametros;
     }
 
-    public Hashtable<String, EntradaConstante> getConstanteMet() {
+    public HashMap<String, EntradaConstante> getConstanteMet() {
         return constanteMet;
     }
 
-    public Hashtable<String, EntradaVar> getVariablesMet() {
+    public HashMap<String, EntradaVar> getVariablesMet() {
         return variablesMet;
     }
     public int getTamañoParam(){
@@ -96,8 +110,8 @@ public class EntradaMetodo{
     }
     public int getTamañoAtribs(){
         int tam = 0;
-        for(Map.Entry<String, EntradaVar> var : variablesMet.entrySet()){
-            EntradaVar eVar = var.getValue();
+        for(Map.Entry<String, EntradaVar> varble : variablesMet.entrySet()){
+            EntradaVar eVar = varble.getValue();
             if(eVar.getTipo().equals("String")){
                 tam += 32;
             }else{

@@ -5,11 +5,10 @@
  */
 package com.compiladores.compilador.etapa4;
 
-import com.compiladores.compilador.etapa1.Token;
+import com.compiladores.compilador.etapa2.ExcepcionSintactica;
 import com.compiladores.compilador.etapa3.ExcepcionSemantica;
 import com.compiladores.compilador.etapa3.TablaDeSimbolos;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -92,12 +91,13 @@ public class NodoClase extends NodoAST{
     }
 
     @Override
-    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica {
+    public boolean verifica(TablaDeSimbolos ts) throws ExcepcionSemantica,ExcepcionSintactica {
         if(!constantes.isEmpty()){
             for(Map.Entry<String, NodoSentencia> entry : constantes.entrySet()) {
                 String key = entry.getKey();
                 NodoAsignacion value = (NodoAsignacion) entry.getValue();
                 value.verifica(ts);
+                // ts.getClases().get(key).incTamaño(ts.getClases().get(value.getTipo(ts)).getTamaño());
             }
             
         }

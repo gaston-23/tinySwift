@@ -5,8 +5,7 @@
  */
 package com.compiladores.compilador.etapa3;
 
-import com.compiladores.compilador.etapa2.ExcepcionSintactica;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,29 +13,29 @@ import java.util.Map;
  * @author Gaston Cavallo
  */
 public class TablaDeSimbolos {
-    private Hashtable<String,EntradaClase> clases;
-    private EntradaClase claseActual;
-    private EntradaMetodo metodoActual;
-    private String nombre; 
-    private int lastLabel=0;
-    private int labelString = 0;
-    private Hashtable<String,String> labels;
+    private HashMap<String,EntradaClase> clases;// lista de clases del programa
+    private EntradaClase claseActual;           // clase en el scope
+    private EntradaMetodo metodoActual;         // metodo en el scope
+    private String nombre;                      // nombre del programa
+    private int lastLabel=0;                    // para enumerar bloques en gci
+    private int labelString = 0;                // para enumerar Strings en gci
+    private HashMap<String,String> labels;      // lista de labels para gci
 
     
     public TablaDeSimbolos (String nombre){
-        this.clases = new Hashtable<>();
-        this.clases.put("Int", new EntradaClase("Int","Object",0,0));
-        this.clases.put("Bool", new EntradaClase("Bool","Object",0,0));        
-        this.clases.put("Char", new EntradaClase("Char","Object",0,0));
+        this.clases = new HashMap<>();
+        this.clases.put("Int", new EntradaClase("Int","Object",0,0,4));
+        this.clases.put("Bool", new EntradaClase("Bool","Object",0,0,4));        
+        this.clases.put("Char", new EntradaClase("Char","Object",0,0,4));
         this.clases.put("String", stringClass());
         this.clases.put("IO", ioClass());
-        this.clases.put("Object", new EntradaClase("Object",null,0,0));
+        this.clases.put("Object", new EntradaClase("Object",null,0,0,4));
         this.nombre = nombre;
-        this.labels = new Hashtable<>();
+        this.labels = new HashMap<>();
     }
     
     public EntradaClase stringClass(){
-        EntradaClase claseString = new EntradaClase("String","Object",0,0);
+        EntradaClase claseString = new EntradaClase("String","Object",0,0,4);
         claseString.insertaMetodo("length", "Int");
         claseString.insertaMetodo("concat","String");
         claseString.getMetodo("concat").insertaParametro("String","s",0,0);
@@ -49,11 +48,11 @@ public class TablaDeSimbolos {
     /**
      * ioClass
      * retorna la clase IO en formato EntradaClase con todos sus metodos
-     * @return la clase IO para insertar en la hashTable de la tds
+     * @return la clase IO para insertar en la HashMap de la tds
      * 
      */
     public EntradaClase ioClass(){
-        EntradaClase claseIO = new EntradaClase("IO","Object",0,0);
+        EntradaClase claseIO = new EntradaClase("IO","Object",0,0,4);
         claseIO.insertaMetodo("out_string", "void");
         claseIO.getMetodo("out_string").insertaParametro("String","s",0,0);
         claseIO.insertaMetodo("out_int","void");
@@ -113,7 +112,7 @@ public class TablaDeSimbolos {
         return claseActual;
     }
 
-    public Hashtable<String, EntradaClase> getClases() {
+    public HashMap<String, EntradaClase> getClases() {
         return clases;
     }
 
@@ -129,17 +128,21 @@ public class TablaDeSimbolos {
         this.labels.put(key, data);
     }
 
-    public Hashtable<String, String> getLabels() {
+    public HashMap<String, String> getLabels() {
         return labels;
     }
     
     
-
+    /**
+     * imprimeTS : devuelve una serializacion de la TS
+     * @author Gaston Cavallo
+     * @return un String con los datos de la TS
+     */
     public String imprimeTS(){
         String json = "{\n \"nombre\":\""+this.nombre+"\",\n";
         json += "\"Clases\":[\n";
         for(Map.Entry<String, EntradaClase> entry : clases.entrySet()) {
-            String key = entry.getKey();
+            
             EntradaClase value = entry.getValue();
             json +="{\""+ value.getNombre() + "\": {\n"+ value.imprimirEC()+"\n}\n},";
         }
